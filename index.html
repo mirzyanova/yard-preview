@@ -45,6 +45,18 @@
 @media(max-width:1050px){.mosaic,.section-heading{width:calc(100% - 100px)}.mosaic{column-gap:35px;row-gap:85px}}
 @media(max-width:700px){.mosaic{grid-template-columns:repeat(2,minmax(0,1fr))}.mosaic,.section-heading{width:calc(100% - 50px)}.mosaic{gap:50px 22px}.mosaic .tile,.mosaic .tile:nth-child(2){aspect-ratio:.98}.section-heading{padding-top:60px}.logo{font-size:22px;gap:7px}.logo svg{width:24px;height:30px}}
 @media(max-width:440px){.mosaic{grid-template-columns:1fr;width:calc(100% - 70px);gap:55px}.mosaic .tile:nth-child(2){width:87%;justify-self:end;aspect-ratio:1.08}.section-heading{width:calc(100% - 70px)}.cookie-banner{left:12px;bottom:12px;width:calc(100vw - 24px);padding:16px 45px 16px 16px}}
+
+/* Navigation controls appear only within the outer quarter of each image. */
+.control-zone{padding:0;display:block;pointer-events:none}
+.control-zone .arrow-zone{appearance:none;display:flex;align-items:center;position:absolute;top:0;bottom:0;width:25%;border:0;background:transparent;color:#111;padding:0;z-index:5;cursor:pointer;pointer-events:auto}
+.control-zone .prev{left:0;justify-content:flex-start;padding-left:clamp(12px,2.5vw,45px)}
+.control-zone .next{right:0;justify-content:flex-end;padding-right:clamp(12px,2.5vw,45px)}
+.control-zone .arrow{pointer-events:none}
+.hero .control-zone .arrow,.gallery .control-zone .arrow{opacity:0}
+.hero .control-zone .arrow-zone:hover .arrow,.gallery .control-zone .arrow-zone:hover .arrow,
+.hero .control-zone .arrow-zone:focus-visible .arrow,.gallery .control-zone .arrow-zone:focus-visible .arrow{opacity:1}
+@media(max-width:600px){.control-zone .arrow-zone{width:23%}}
+@media(hover:none){.hero .control-zone .arrow,.gallery .control-zone .arrow{opacity:1}}
 </style>
 </head>
 <body>
@@ -72,7 +84,7 @@ var projects=photos.map(function(url,i){return {id:i,name:"Проект "+String
 var app=document.getElementById("app"), timer=null, clearEvents=function(){};
 function page(id){window.location.hash="#/"+id}
 function img(url,alt){return '<img src="'+url+'" alt="'+alt+'" loading="lazy">'}
-function controls(){return '<div class="control-zone"><button class="arrow prev" aria-label="Предыдущее изображение">‹</button><button class="arrow next" aria-label="Следующее изображение">›</button></div>'}
+function controls(){return '<div class="control-zone"><button class="arrow-zone prev" type="button" aria-label="Предыдущее изображение"><span class="arrow" aria-hidden="true">‹</span></button><button class="arrow-zone next" type="button" aria-label="Следующее изображение"><span class="arrow" aria-hidden="true">›</span></button></div>'}
 function setActive(route){document.querySelectorAll(".nav a").forEach(function(a){var k=a.getAttribute("data-page");a.classList.toggle("active", k==="about"&&(route==="/"||route==="/about")||k==="projects"&&route.indexOf("/projects")===0||k==="contacts"&&route==="/contacts")})}
 function bindSlideshow(root,images,autoplay){
 var index=0, photo=root.querySelector(".gallery-photo"), slides=root.querySelectorAll(".hero-slide"), count=root.querySelector(".counter,.gallery-count");
