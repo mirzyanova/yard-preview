@@ -18,12 +18,40 @@
 @media(max-width:850px){.intro{grid-template-columns:1fr;gap:65px;min-height:auto}.intro-text{max-width:650px}.mosaic{width:calc(100% - 10vw)}.mosaic-row{gap:5vw}.closing{padding-block:75px 100px}.detail{grid-template-columns:1fr;gap:28px}}
 @media(max-width:600px){:root{--page:20px}.site-header{height:70px}.logo{font-size:29px}.nav{gap:17px}.nav a{font-size:12px}.intro{padding-top:76px;padding-bottom:85px;gap:55px}.word{font-size:clamp(100px,25vw,155px)}.word-note{font-size:10px;margin:15px 0 0 4px}.intro-text{font-size:19px}.hero,.gallery{height:70svh;min-height:390px}.arrow{opacity:1;width:36px;height:36px;font-size:23px}.control-zone{padding:0 7px}.hero-caption{bottom:30px;max-width:65%}.hero-caption strong{font-size:27px}.counter{bottom:31px}.closing{flex-direction:column;align-items:flex-start;gap:40px}.closing p{font-size:28px}.section-heading{padding:80px 27px 70px}.section-heading h1{font-size:70px}.mosaic{width:auto;margin:0 27px;padding-bottom:110px;gap:70px}.mosaic-row{display:flex;flex-direction:column;gap:65px;min-height:0;align-items:stretch}.tile,.tile:nth-child(2),.mosaic-row:nth-child(2n) .tile:first-child,.mosaic-row:nth-child(2n+1) .tile:nth-child(2){width:100%;aspect-ratio:1.16}.mosaic-row .tile:nth-child(2){width:89%;align-self:flex-end;aspect-ratio:.96}.tile-info{opacity:1;padding:18px}.tile-info strong{font-size:23px}.tile-info small{font-size:12px}.project-heading{padding-top:58px}.project-heading h1{font-size:clamp(52px,12vw,76px)}.detail{padding:83px var(--page) 110px}.detail p{font-size:23px}.next-project strong{font-size:42px}.contacts{padding-top:85px}.contacts h1{font-size:75px;margin-bottom:90px}.contact-grid{display:block}.contact-grid>div+div{margin-top:85px}.email{font-size:30px}.footer{display:block;padding-bottom:58px}.footer span{display:block;margin-bottom:8px}.preview-tag{font-size:8px;bottom:5px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Brand guidelines: Sitka titles, Century Gothic body. Exact font files require licensing. */
+:root{--font:"Century Gothic","CenturyGothic",Arial,sans-serif}
+.logo{display:inline-flex;align-items:center;gap:11px;font-family:"Sitka Display","Sitka Text",Cambria,Georgia,serif;font-weight:400;font-size:28px;letter-spacing:.01em}
+.logo svg{display:block;width:29px;height:36px;flex:none}
+.word,.section-heading h1,.project-heading h1,.contacts h1,.next-project strong{font-family:"Sitka Display","Sitka Text",Cambria,Georgia,serif;font-weight:400;letter-spacing:-.035em}
+.word{font-size:clamp(105px,12vw,185px)}
+.intro-text,.detail p{letter-spacing:0}
+.section-heading{width:min(1080px,calc(100% - 26vw));max-width:none;padding:70px 0 54px}
+.section-heading .eyebrow{display:none}
+.section-heading h1{font-size:clamp(29px,2.5vw,38px);line-height:1.2;margin:0;letter-spacing:-.02em}
+.mosaic{width:min(1080px,calc(100% - 26vw));max-width:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(30px,3.2vw,58px);row-gap:clamp(95px,9vw,155px);align-items:start}
+.mosaic-row{display:contents}
+.mosaic .tile,.mosaic-row:nth-child(2n) .tile:first-child,.mosaic-row:nth-child(2n+1) .tile:nth-child(2){width:100%;justify-self:auto;aspect-ratio:1.04}
+.mosaic .tile:nth-child(2){aspect-ratio:.92}
+.mosaic .tile:hover img{transform:scale(1.018)}
+.mosaic .tile-info strong{font-family:"Sitka Text",Cambria,Georgia,serif;letter-spacing:0}
+.cookie-banner{position:fixed;left:22px;bottom:22px;z-index:99;width:min(455px,calc(100vw - 44px));background:#fff;color:#161616;border:1px solid #d7d7d7;box-shadow:0 7px 24px rgba(0,0,0,.06);padding:20px 50px 20px 22px;font-size:12px;line-height:1.65}
+.cookie-banner[hidden]{display:none}
+.cookie-banner a{text-decoration:underline;text-underline-offset:3px}
+.cookie-close{border:0;background:transparent;color:#333;position:absolute;right:13px;top:10px;font:300 27px/1 Arial,sans-serif;cursor:pointer;padding:3px 7px}
+.privacy{max-width:950px;min-height:65svh;margin:auto;padding:110px 25px}
+.privacy h1{font:400 clamp(34px,4vw,55px) "Sitka Text",Cambria,Georgia,serif;margin:0 0 50px}
+.privacy p{font-size:17px;line-height:1.7;max-width:670px}
+@media(max-width:1050px){.mosaic,.section-heading{width:calc(100% - 100px)}.mosaic{column-gap:35px;row-gap:85px}}
+@media(max-width:700px){.mosaic{grid-template-columns:repeat(2,minmax(0,1fr))}.mosaic,.section-heading{width:calc(100% - 50px)}.mosaic{gap:50px 22px}.mosaic .tile,.mosaic .tile:nth-child(2){aspect-ratio:.98}.section-heading{padding-top:60px}.logo{font-size:22px;gap:7px}.logo svg{width:24px;height:30px}}
+@media(max-width:440px){.mosaic{grid-template-columns:1fr;width:calc(100% - 70px);gap:55px}.mosaic .tile:nth-child(2){width:87%;justify-self:end;aspect-ratio:1.08}.section-heading{width:calc(100% - 70px)}.cookie-banner{left:12px;bottom:12px;width:calc(100vw - 24px);padding:16px 45px 16px 16px}}
 </style>
 </head>
 <body>
-<header class="site-header"><a class="logo" href="#/" aria-label="ЯРД, главная">ЯРД</a><nav class="nav" aria-label="Главное меню"><a href="#/about" data-page="about">О нас</a><a href="#/projects" data-page="projects">Проекты</a><a href="#/contacts" data-page="contacts">Контакты</a></nav></header>
+<header class="site-header"><a class="logo" href="#/" aria-label="ЯРД, главная"><svg viewBox="0 0 530 657" role="img" aria-label="Графический знак ЯРД" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" fill-rule="evenodd" d="M24,14 L12,27 L7,38 L6,44 L6,613 L9,624 L16,635 L28,645 L42,650 L487,650 L494,648 L505,642 L518,627 L523,609 L523,47 L520,34 L514,23 L500,11 L485,6 L44,6 L33,9Z M503,438 L503,610 L499,620 L493,626 L481,631 L303,630 L310,606 L323,581 L350,546 L379,516 L410,488 L442,465 L480,445 L501,437Z M27,308 L70,327 L96,342 L125,362 L143,377 L162,396 L196,438 L214,466 L231,498 L243,526 L252,552 L261,588 L261,629 L259,631 L48,631 L37,627 L29,619 L26,612Z M502,288 L503,394 L501,396 L482,401 L451,414 L427,427 L404,442 L377,463 L355,483 L317,523 L316,521 L323,503 L346,455 L366,421 L400,373 L420,350 L448,323 L477,301 L494,291Z M27,157 L53,167 L83,181 L113,198 L150,224 L176,247 L206,281 L226,309 L244,340 L255,364 L265,395 L262,470 L243,436 L219,401 L193,370 L162,340 L133,318 L101,298 L66,280 L28,266 L26,264Z M502,106 L503,265 L473,280 L447,298 L429,313 L395,348 L366,385 L345,417 L323,456 L304,497 L303,459 L305,420 L305,378 L307,356 L316,321 L325,295 L346,250 L361,225 L376,204 L408,168 L432,147 L457,129 L483,114Z M26,135 L26,44 L30,36 L36,30 L44,26 L484,26 L491,29 L498,35 L503,47 L502,62 L481,70 L457,82 L416,108 L387,132 L364,155 L347,175 L323,209 L300,251 L283,292 L268,344 L250,310 L228,277 L200,243 L174,218 L143,194 L108,172 L66,151 L33,138 L30,138Z"/></svg><span>ЯРД</span></a><nav class="nav" aria-label="Главное меню"><a href="#/about" data-page="about">О нас</a><a href="#/projects" data-page="projects">Проекты</a><a href="#/contacts" data-page="contacts">Контакты</a></nav></header>
 <main id="app"></main>
 <footer class="footer"><span>© ЯРД · 2026</span><span>Архитектурное бюро · Москва</span></footer>
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Информация о cookie" hidden>На сайте могут использоваться технические cookie. <a href="#/privacy">Подробнее</a><button class="cookie-close" type="button" aria-label="Закрыть уведомление">×</button></div>
 <div class="preview-tag">ЭСКИЗ · ДЕМОНСТРАЦИОННЫЕ ФОТО, НЕ ПРОЕКТЫ ЯРД</div>
 <script>
 (function(){
@@ -59,7 +87,7 @@ start();clearEvents=stop;
 }
 function home(){
 var selected=projects.slice(0,4);
-app.innerHTML='<section class="intro" id="about"><div><div class="eyebrow">АРХИТЕКТУРНОЕ БЮРО / МОСКВА</div><h1 class="word">YARD</h1><p class="word-note">Yard — двор, площадка, сад, парк.</p></div><div class="intro-text"><p>ЯРД — архитектурное бюро, которое проектирует осмысленные ландшафты. Наша цель — выразительная и качественная городская среда.</p><a class="text-link" href="#/projects">Смотреть проекты ↗</a></div></section><section class="hero" aria-label="Избранные проекты">'+selected.map(function(p,i){return '<div class="hero-slide'+(i===0?' active':'')+'" aria-hidden="'+(i!==0)+'"><a href="#/projects/'+p.id+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="hero-caption"><strong>'+p.name+'</strong><span>'+p.stage+' · '+p.year+'</span></div></a></div>'}).join("")+controls()+'<div class="counter">01 / 04</div></section><section class="closing"><p>В основе работы бюро — внимание к месту, его характеру и тому, как люди взаимодействуют с пространством.</p><a class="text-link" href="#/projects">Все проекты ↗</a></section>';
+app.innerHTML='<section class="intro" id="about"><div><div class="eyebrow">АРХИТЕКТУРНОЕ БЮРО / МОСКВА</div><h1 class="word">ЯРД</h1><p class="word-note">yard — двор, площадка, сад, парк.</p></div><div class="intro-text"><p>ЯРД — архитектурное бюро, которое проектирует осмысленные ландшафты. Наша цель — выразительная и качественная городская среда.</p><a class="text-link" href="#/projects">Смотреть проекты ↗</a></div></section><section class="hero" aria-label="Избранные проекты">'+selected.map(function(p,i){return '<div class="hero-slide'+(i===0?' active':'')+'" aria-hidden="'+(i!==0)+'"><a href="#/projects/'+p.id+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="hero-caption"><strong>'+p.name+'</strong><span>'+p.stage+' · '+p.year+'</span></div></a></div>'}).join("")+controls()+'<div class="counter">01 / 04</div></section><section class="closing"><p>В основе работы бюро — внимание к месту, его характеру и тому, как люди взаимодействуют с пространством.</p><a class="text-link" href="#/projects">Все проекты ↗</a></section>';
 bindSlideshow(app.querySelector(".hero"),selected.map(function(p){return p.image}),true)
 }
 function allProjects(){
@@ -71,9 +99,13 @@ var next=projects[(p.id+1)%projects.length];
 app.innerHTML='<article><header class="project-heading"><a class="back" href="#/projects">← Все проекты</a><h1>'+p.name+'</h1><div class="meta">'+p.stage+' · '+p.year+'</div></header><section class="gallery" aria-label="Галерея изображений"><img class="gallery-photo" src="'+p.gallery[0]+'" alt="Демонстрационное фото, не проект ЯРД">'+controls()+'<div class="gallery-count">01 / 03</div></section><section class="detail"><div class="detail-label">О ПРОЕКТЕ</div><p>Демонстрационное описание. Здесь будет текст о замысле проекта, особенностях места и предложенных архитектурных решениях. В окончательной версии владелец бюро сможет редактировать его через административную панель.</p></section><a class="next-project" href="#/projects/'+next.id+'"><div><small>СЛЕДУЮЩИЙ ПРОЕКТ</small><strong>'+next.name+'</strong></div><span class="next-arrow">↗</span></a></article>';
 bindSlideshow(app.querySelector(".gallery"),p.gallery,false)
 }
+function privacy(){app.innerHTML='<section class="privacy"><h1>Cookie и конфиденциальность</h1><p>Это тестовая версия сайта ЯРД. Здесь нет рекламных или аналитических cookie. Чтобы не показывать уведомление повторно, мы сохраняем ваш выбор в памяти браузера (localStorage). При запуске полноценного сайта информация будет дополнена с учётом фактически подключённых сервисов.</p><p><a class="text-link" href="#/">← На главную</a></p></section>'}
 function contacts(){app.innerHTML='<section class="contacts"><div class="eyebrow">ЯРД / СВЯЗЬ</div><h1>Контакты</h1><div class="contact-grid"><div><small>НАПИШИТЕ НАМ</small><a class="email" href="mailto:yard.bureau@mail.ru">yard.bureau@mail.ru</a></div><div><small>БЮРО</small><p>Москва<br>Руководитель — Роман Зимин</p></div></div></section>'}
-function route(){clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"){allProjects()}else if(r==="/contacts"){contacts()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
-window.addEventListener("hashchange",route);route()
+function route(){clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"){allProjects()}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
+window.addEventListener("hashchange",route);route();
+var cb=document.getElementById("cookieBanner");
+try{if(localStorage.getItem("yard-cookie-notice-closed")!=="1") cb.hidden=false;}catch(e){cb.hidden=false}
+cb.querySelector("button").addEventListener("click",function(){cb.hidden=true;try{localStorage.setItem("yard-cookie-notice-closed","1")}catch(e){}})
 })();
 </script>
 </body>
