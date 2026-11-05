@@ -121,6 +121,13 @@
  .mosaic-row .tile.size-medium{width:88% !important}
  .mosaic-row .tile.size-large{width:96% !important}
 }
+
+/* 2026-11-05: reduce homepage horizontal logo to former large YARD wordmark height.
+   Keep intro grid, column start and right-hand copy placement unchanged. */
+.home-logo{width:clamp(320px,24.6vw,440px);max-width:100%;height:auto}
+.closing p{font-size:clamp(19px,2vw,29px)}
+@media(max-width:900px){.home-logo{width:clamp(300px,45vw,410px)}}
+@media(max-width:600px){.home-logo{width:min(100%,360px)}.closing p{font-size:24px}}
 </style>
 </head>
 <body>
