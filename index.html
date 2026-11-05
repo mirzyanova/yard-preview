@@ -233,6 +233,31 @@
  .list-project-year{grid-area:year;color:#666;text-align:right}
  .list-project-location{grid-area:location;font-size:12px;color:#777}
 }
+
+/* Shared outer axes: project cards and project controls use the same page edges as the site header. */
+.mosaic .mosaic-column:first-child .tile{align-self:flex-start}
+.mosaic .mosaic-column:last-child .tile{align-self:flex-end}
+/* In the three-column layout the middle cards keep a deliberately centered rhythm. */
+@media(min-width:901px){.mosaic .mosaic-column:nth-child(2) .tile{align-self:center}}
+@media(max-width:600px){
+  .mosaic .mosaic-column:last-child .tile{align-self:flex-start}
+  .mosaic .mosaic-column .tile:nth-child(2n){align-self:flex-end}
+}
+/* Contacts: coherent site-wide axes and quieter heading hierarchy. */
+.contacts{max-width:none;margin:0;padding-left:var(--page);padding-right:var(--page)}
+.contacts-heading{margin-bottom:clamp(92px,9vw,135px)}
+.contacts h1{font-size:clamp(24px,2vw,32px);font-weight:400;letter-spacing:0;line-height:1.25;margin:0 0 clamp(26px,3vw,40px)}
+.contacts h2{font-family:"Sitka Display","Sitka Text",Cambria,Georgia,serif;font-size:clamp(55px,6vw,88px);line-height:1.05;font-weight:400;letter-spacing:-.025em;margin:0 0 18px}
+.contacts-city{font-size:clamp(16px,1.45vw,20px);line-height:1.5;margin:0}
+.contacts .contact-grid{grid-template-columns:minmax(0,1.4fr) minmax(0,.6fr);gap:clamp(35px,6vw,115px)}
+.contacts .contact-grid small{font-size:12px;letter-spacing:.06em}
+@media(max-width:600px){
+  .contacts h1{font-size:25px;margin-bottom:28px}
+  .contacts h2{font-size:58px}
+  .contacts-heading{margin-bottom:90px}
+  .contacts .contact-grid{display:block}
+  .contacts .contact-grid>div+div{margin-top:65px}
+}
 </style>
 </head>
 <body>
@@ -341,7 +366,7 @@ app.innerHTML='<article><header class="project-heading"><a class="back" href="#/
 bindSlideshow(app.querySelector(".gallery"),p.gallery,false)
 }
 function privacy(){app.innerHTML='<section class="privacy"><h1>Cookie и конфиденциальность</h1><p>Это тестовая версия сайта ЯРД. Здесь нет рекламных или аналитических cookie. Чтобы не показывать уведомление повторно, мы сохраняем ваш выбор в памяти браузера (localStorage). При запуске полноценного сайта информация будет дополнена с учётом фактически подключённых сервисов.</p><p><a class="text-link" href="#/">← На главную</a></p></section>'}
-function contacts(){app.innerHTML='<section class="contacts"><div class="eyebrow">ЯРД / СВЯЗЬ</div><h1>Контакты</h1><div class="contact-grid"><div><small>НАПИШИТЕ НАМ</small><a class="email" href="mailto:yard.bureau@mail.ru">yard.bureau@mail.ru</a></div><div><small>БЮРО</small><p>Москва<br>Руководитель — Роман Зимин</p></div></div></section>'}
+function contacts(){app.innerHTML='<section class="contacts"><div class="contacts-heading"><h1>Контакты</h1><h2>АБ ЯРД</h2><p class="contacts-city">г. Москва</p></div><div class="contact-grid"><div><small>НАПИШИТЕ НАМ</small><a class="email" href="mailto:yard.bureau@mail.ru">yard.bureau@mail.ru</a></div><div><small>Руководитель бюро</small><p>Роман Зимин</p></div></div></section>'}
 function route(){clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"||r.indexOf("/projects?")===0){var selectedView=/[?&]view=list(?:&|$)/.test(r)?"list":(/[?&]view=grid(?:&|$)/.test(r)?"grid":projectView);allProjects(selectedView)}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
 window.addEventListener("resize",function(){var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";if((r==="/projects"||r.indexOf("/projects?")===0)&&projectView==="grid"&&app.dataset.mosaicColumns!==String(mosaicColumnCount()))allProjects("grid")});
 window.addEventListener("hashchange",route);route();
