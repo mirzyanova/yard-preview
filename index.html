@@ -128,6 +128,13 @@
 .closing p{font-size:clamp(19px,2vw,29px)}
 @media(max-width:900px){.home-logo{width:clamp(300px,45vw,410px)}}
 @media(max-width:600px){.home-logo{width:min(100%,360px)}.closing p{font-size:24px}}
+
+/* Restore the studio/location label and scale homepage logo down ~1.7x.
+   Right-hand text column and grid remain unchanged. */
+.brand-eyebrow{margin:0 0 26px}
+.home-logo{width:clamp(188px,14.47vw,259px);max-width:100%;height:auto}
+@media(max-width:900px){.home-logo{width:clamp(176px,26.5vw,241px)}}
+@media(max-width:600px){.home-logo{width:min(100%,212px)}.brand-eyebrow{margin-bottom:22px}}
 </style>
 </head>
 <body>
@@ -170,7 +177,7 @@ start();clearEvents=stop;
 }
 function home(){
 var selected=projects.slice(0,4);
-app.innerHTML='<section class="intro" id="about"><div class="intro-brand"><img class="home-logo" src="assets/yard-logo-horizontal.svg" alt="ЯРД — Архитектурное бюро"><p class="word-note">Yard (ja:d) Ярд — Двор, площадка, сад, парк.<br>Данное слово объединяет в себе совокупность пространств, с которыми чаще всего сталкивается ландшафтный архитектор в своей практике.</p></div><div class="intro-text"><p>Продвигаем идею осмысленной ландшафтной архитектуры, являющейся по своему характеру монументальной, знаковой, оставляющей заметный след в сфере</p><a class="text-link" href="#/projects">Смотреть проекты ↗</a></div></section><section class="hero" aria-label="Избранные проекты">'+selected.map(function(p,i){return '<div class="hero-slide'+(i===0?' active':'')+'" aria-hidden="'+(i!==0)+'"><a href="#/projects/'+p.id+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="hero-caption"><strong>'+p.name+'</strong><span>'+p.stage+' · '+p.year+'</span></div></a></div>'}).join("")+controls()+'<div class="counter">01 / 04</div></section><section class="closing"><p>Деятельность ландшафтного архитектора является созидательной, формирующей новый уровень представления об эстетике пространства и качестве городской среды, а также учитывает ключевые особенности современных условий деятельности самого архитектора.</p><a class="text-link" href="#/projects">Все проекты ↗</a></section>';
+app.innerHTML='<section class="intro" id="about"><div class="intro-brand"><div class="eyebrow brand-eyebrow">Архитектурное бюро. Москва</div><img class="home-logo" src="assets/yard-logo-horizontal.svg" alt="ЯРД — Архитектурное бюро"><p class="word-note">Yard (ja:d) Ярд — Двор, площадка, сад, парк.<br>Данное слово объединяет в себе совокупность пространств, с которыми чаще всего сталкивается ландшафтный архитектор в своей практике.</p></div><div class="intro-text"><p>Продвигаем идею осмысленной ландшафтной архитектуры, являющейся по своему характеру монументальной, знаковой, оставляющей заметный след в сфере</p><a class="text-link" href="#/projects">Смотреть проекты ↗</a></div></section><section class="hero" aria-label="Избранные проекты">'+selected.map(function(p,i){return '<div class="hero-slide'+(i===0?' active':'')+'" aria-hidden="'+(i!==0)+'"><a href="#/projects/'+p.id+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="hero-caption"><strong>'+p.name+'</strong><span>'+p.stage+' · '+p.year+'</span></div></a></div>'}).join("")+controls()+'<div class="counter">01 / 04</div></section><section class="closing"><p>Деятельность ландшафтного архитектора является созидательной, формирующей новый уровень представления об эстетике пространства и качестве городской среды, а также учитывает ключевые особенности современных условий деятельности самого архитектора.</p><a class="text-link" href="#/projects">Все проекты ↗</a></section>';
 bindSlideshow(app.querySelector(".hero"),selected.map(function(p){return p.image}),true)
 }
 function allProjects(){
