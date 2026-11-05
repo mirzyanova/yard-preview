@@ -1,0 +1,8 @@
+# YARD staging site — request that search engines not index the preview.
+# The HTML also contains a robots noindex meta tag.
+<IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow, noarchive"
+</IfModule>
+
+# Avoid listing site files if an index is temporarily missing.
+Options -Indexes
