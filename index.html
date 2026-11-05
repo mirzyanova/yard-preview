@@ -57,6 +57,39 @@
 .hero .control-zone .arrow-zone:focus-visible .arrow,.gallery .control-zone .arrow-zone:focus-visible .arrow{opacity:1}
 @media(max-width:600px){.control-zone .arrow-zone{width:23%}}
 @media(hover:none){.hero .control-zone .arrow,.gallery .control-zone .arrow{opacity:1}}
+
+/* 2026-11-05: site editorial refinements */
+.site-header .logo{font-family:"Sitka Text",Cambria,Georgia,serif;font-size:25px;line-height:1.2;font-weight:400;letter-spacing:0}
+.intro{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:center;gap:clamp(65px,10vw,175px);padding-top:clamp(70px,8vw,115px);padding-bottom:clamp(80px,9vw,130px);min-height:auto}
+.intro-brand{display:flex;flex-direction:column;align-items:flex-start}
+.home-logo{display:block;width:clamp(170px,17vw,245px);height:auto}
+.intro .word-note{max-width:390px;width:100%;margin:28px 0 0;font-size:11px;line-height:1.55;color:#555;letter-spacing:0}
+.intro-text{font-size:clamp(20px,1.85vw,27px);line-height:1.5}
+.closing p{font-size:clamp(22px,2.35vw,34px);line-height:1.37;max-width:900px}
+.section-heading,.mosaic{width:calc(100% - 2 * var(--page));max-width:none;margin-left:var(--page);margin-right:var(--page)}
+.section-heading{padding-top:65px;padding-bottom:42px}
+.mosaic{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(34px,4.4vw,78px);row-gap:clamp(82px,9vw,145px)}
+.contacts{padding-top:clamp(85px,8vw,125px)}
+.contacts h1{font-size:clamp(30px,3.1vw,45px);letter-spacing:-.015em;line-height:1.2;margin:24px 0 clamp(90px,8vw,125px)}
+.contacts .eyebrow{font-size:11px}
+.contacts .email{font-size:clamp(21px,2.3vw,34px);letter-spacing:-.025em}
+.contact-grid p{font-size:16px}
+@media(max-width:850px){
+  .intro{grid-template-columns:1fr;gap:50px}
+  .home-logo{width:195px}
+  .mosaic{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+  .site-header .logo{font-size:23px}
+  .intro{padding-top:65px;gap:44px}
+  .home-logo{width:165px}
+  .intro .word-note{font-size:10px;max-width:335px;margin-top:22px}
+  .intro-text{font-size:19px}
+  .section-heading,.mosaic{width:calc(100% - 2 * var(--page));margin-left:var(--page);margin-right:var(--page)}
+  .mosaic{display:grid;grid-template-columns:1fr;gap:60px}
+  .contacts h1{font-size:34px;margin-bottom:70px}
+  .contacts .email{font-size:27px}
+}
 </style>
 </head>
 <body>
