@@ -135,6 +135,29 @@
 .home-logo{width:clamp(188px,14.47vw,259px);max-width:100%;height:auto}
 @media(max-width:900px){.home-logo{width:clamp(176px,26.5vw,241px)}}
 @media(max-width:600px){.home-logo{width:min(100%,212px)}.brand-eyebrow{margin-bottom:22px}}
+
+/* Align homepage brand and philosophy as one typographic composition:
+   eyebrow with the first line of right copy; note with "Смотреть проекты".
+   Keep both columns and their horizontal positions unchanged. */
+.intro{align-content:center;align-items:stretch}
+.intro-brand,.intro-text{align-self:stretch;justify-content:space-between}
+.brand-eyebrow{margin:0}
+.home-logo{width:clamp(325px,25vw,435px);max-width:100%;height:auto}
+.intro .word-note{margin:0 0 7px;max-width:410px}
+.intro-text{display:flex;flex-direction:column}
+.intro-text p{margin:0}
+.intro-text .text-link{margin-top:28px;align-self:flex-start}
+@media(max-width:900px){
+  .intro{align-content:normal}
+  .intro-brand{align-self:auto;justify-content:flex-start;gap:22px}
+  .intro-text{align-self:auto;justify-content:flex-start;gap:28px}
+  .home-logo{width:min(100%,405px)}
+  .intro .word-note{margin:0}
+  .intro-text .text-link{margin-top:0}
+}
+@media(max-width:600px){
+  .home-logo{width:min(100%,365px)}
+}
 </style>
 </head>
 <body>
