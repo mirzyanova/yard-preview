@@ -315,14 +315,16 @@ var photos=[
 var stages=["Концепция","Проект","Реализация","Концепция","Проект","Рабочая документация","Проект","Реализация"];
 var years=["2026","2025","2024","2025","2023","2024","2026","2022"];
 var projects=photos.map(function(url,i){return {id:i,name:"Проект "+String(i+1).padStart(2,"0"),year:years[i],stage:stages[i],location:"—",image:url,gallery:[url,photos[(i+3)%8],photos[(i+5)%8]]}});
+/* First approved real portfolio entry. Images show after erfurt-01/02/03.webp are uploaded to repository root. */
+projects[0]={id:0,name:"Арт-объект ERFURT на бульваре ЗИЛАРТ",stage:"Реализация",year:"2024",location:"Москва, Россия",image:"erfurt-01.webp",gallery:["erfurt-01.webp","erfurt-02.webp","erfurt-03.webp"],description:""};
 var app=document.getElementById("app"), timer=null, clearEvents=function(){}, projectView="grid";
 function page(id){window.location.hash="#/"+id}
-function img(url,alt){return '<img src="'+url+'" alt="'+alt+'" loading="lazy">'}
+function img(url,alt){var missing=url.indexOf("erfurt-")===0?' onerror="this.onerror=null;this.src=\'assets/erfurt-photo-pending.svg\'"':'';return '<img src="'+url+'" alt="'+alt+'" loading="lazy"'+missing+'>'}
 function controls(){return '<div class="control-zone"><button class="arrow-zone prev" type="button" aria-label="Предыдущее изображение"><span class="arrow" aria-hidden="true">‹</span></button><button class="arrow-zone next" type="button" aria-label="Следующее изображение"><span class="arrow" aria-hidden="true">›</span></button></div>'}
 function setActive(route){document.querySelectorAll(".nav a").forEach(function(a){var k=a.getAttribute("data-page");a.classList.toggle("active", k==="about"&&(route==="/"||route==="/about")||k==="projects"&&route.indexOf("/projects")===0||k==="contacts"&&route==="/contacts")})}
 function bindSlideshow(root,images,autoplay){
 var index=0, photo=root.querySelector(".gallery-photo"), slides=root.querySelectorAll(".hero-slide"), count=root.querySelector(".counter,.gallery-count");
-function show(n){index=(n+images.length)%images.length;if(photo){photo.src=images[index]}if(slides.length){slides.forEach(function(el,i){el.classList.toggle("active",i===index);el.setAttribute("aria-hidden",String(i!==index))})}if(count)count.textContent=String(index+1).padStart(2,"0")+" / "+String(images.length).padStart(2,"0")}
+function show(n){index=(n+images.length)%images.length;if(photo){photo.onerror=function(){if(this.getAttribute("src")!=="assets/erfurt-photo-pending.svg")this.src="assets/erfurt-photo-pending.svg"};photo.src=images[index]}if(slides.length){slides.forEach(function(el,i){el.classList.toggle("active",i===index);el.setAttribute("aria-hidden",String(i!==index))})}if(count)count.textContent=String(index+1).padStart(2,"0")+" / "+String(images.length).padStart(2,"0")}
 function stop(){if(timer){clearInterval(timer);timer=null}}
 function start(){if(autoplay&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){stop();timer=setInterval(function(){show(index+1)},6500)}}
 root.querySelector(".prev").onclick=function(){show(index-1);start()};
@@ -350,6 +352,7 @@ var rows=app.querySelectorAll('.project-list-row');
 var preview=app.querySelector('.project-list-preview');
 if(!preview||!rows.length||!window.matchMedia('(hover:hover) and (pointer:fine)').matches)return;
 var image=preview.querySelector('img');
+image.onerror=function(){this.onerror=null;this.src="assets/erfurt-photo-pending.svg"};
 function follow(e){
 var width=preview.offsetWidth||155,height=preview.offsetHeight||215;
 var x=e.clientX+65,y=e.clientY-height*0.40;
@@ -396,7 +399,7 @@ app.dataset.mosaicColumns=String(columnCount)
 }
 function oneProject(p){
 var next=projects[(p.id+1)%projects.length];
-app.innerHTML='<article><header class="project-heading"><a class="back" href="#/projects">← Все проекты</a><h1>'+p.name+'</h1><div class="meta">'+p.stage+' · '+p.year+'</div></header><section class="gallery" aria-label="Галерея изображений"><img class="gallery-photo" src="'+p.gallery[0]+'" alt="Демонстрационное фото, не проект ЯРД">'+controls()+'<div class="gallery-count">01 / 03</div></section><section class="detail"><div class="detail-label">О ПРОЕКТЕ</div><p>Демонстрационное описание. Здесь будет текст о замысле проекта, особенностях места и предложенных архитектурных решениях. В окончательной версии владелец бюро сможет редактировать его через административную панель.</p></section><a class="next-project" href="#/projects/'+next.id+'"><div><small>СЛЕДУЮЩИЙ ПРОЕКТ</small><strong>'+next.name+'</strong></div><span class="next-arrow">↗</span></a></article>';
+app.innerHTML='<article><header class="project-heading"><a class="back" href="#/projects">← Все проекты</a><h1>'+p.name+'</h1><div class="meta">'+p.stage+' · '+p.year+'</div></header><section class="gallery" aria-label="Галерея изображений"><img class="gallery-photo" src="'+p.gallery[0]+'" alt="'+(p.id===0?'Арт-объект ERFURT':'Демонстрационное фото, не проект ЯРД')+'">'+controls()+'<div class="gallery-count">01 / '+String(p.gallery.length).padStart(2,"0")+'</div></section>'+(p.id===0?'':'<section class="detail"><div class="detail-label">О ПРОЕКТЕ</div><p>Демонстрационное описание. Здесь будет текст о замысле проекта, особенностях места и предложенных архитектурных решениях. В окончательной версии владелец бюро сможет редактировать его через административную панель.</p></section>')+'<a class="next-project" href="#/projects/'+next.id+'"><div><small>СЛЕДУЮЩИЙ ПРОЕКТ</small><strong>'+next.name+'</strong></div><span class="next-arrow">↗</span></a></article>';
 bindSlideshow(app.querySelector(".gallery"),p.gallery,false)
 }
 function privacy(){app.innerHTML='<section class="privacy"><h1>Cookie и конфиденциальность</h1><p>Это тестовая версия сайта ЯРД. Здесь нет рекламных или аналитических cookie. Уведомление появляется при каждом новом открытии сайта и не сохраняет отметку о закрытии. При запуске полноценного сайта информация будет дополнена с учётом фактически подключённых сервисов.</p><p><a class="text-link" href="#/">← На главную</a></p></section>'}
