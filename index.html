@@ -168,6 +168,44 @@
 @media(max-width:600px){.mosaic .mosaic-column{gap:58px}}
 /* Shift the entire left brand unit slightly left without changing the two-column grid. */
 @media(min-width:901px){.intro-brand{transform:translateX(-clamp(12px,1.3vw,24px))}}
+
+/* Two views for the project portfolio — grid and an editorial, hover-preview list. */
+.projects-page-heading{display:flex;align-items:center;justify-content:space-between;gap:30px}
+.projects-page-heading h1{margin:0}
+.projects-view-switch{display:flex;align-items:center;gap:30px;font-size:16px}
+.projects-view-switch .view-tab{display:inline-flex;align-items:center;gap:9px;color:#999;border-bottom:1px solid transparent;padding:8px 0 11px;white-space:nowrap;transition:color .18s,border-color .18s}
+.projects-view-switch .view-tab svg{flex:none}
+.projects-view-switch .view-tab.selected,.projects-view-switch .view-tab:hover{color:#151515}
+.projects-view-switch .view-tab.selected{border-color:#151515}
+.project-list{width:calc(100% - 2 * var(--page));margin:52px var(--page) 160px}
+.project-list-head,.project-list-row{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1.15fr) minmax(70px,.25fr);column-gap:26px;align-items:center}
+.project-list-head{color:#888;font-size:13px;padding:0 16px 20px;border-bottom:1px solid #d8d8d8}
+.project-list-row{min-height:92px;border-bottom:1px solid #d9d9d9;padding:20px 16px;font-size:17px;line-height:1.45;transition:background .14s}
+.project-list-row:hover,.project-list-row:focus-visible{background:#f3f3f3}
+.list-project-name{font-family:"Sitka Text",Cambria,Georgia,serif;font-size:clamp(20px,1.55vw,25px);font-weight:400}
+.list-project-stage,.list-project-year{font-size:15px}
+.project-list-preview{position:fixed;top:0;left:0;width:clamp(195px,19vw,290px);height:clamp(240px,24vw,355px);pointer-events:none;opacity:0;transform:translate3d(-100vw,-100vh,0);z-index:15;transition:opacity .16s;overflow:hidden;background:#e8e8e8}
+.project-list-preview.visible{opacity:1}
+.project-list-preview img{display:block;width:100%;height:100%;object-fit:cover}
+@media(max-width:800px){
+ .project-list-head,.project-list-row{grid-template-columns:minmax(0,1.5fr) minmax(0,.75fr) 55px;column-gap:18px}
+ .project-list{margin-top:30px}
+ .projects-view-switch{gap:18px}
+ .project-list-row{min-height:80px;font-size:15px}
+ .list-project-name{font-size:19px}
+ .list-project-stage,.list-project-year{font-size:13px}
+}
+@media(max-width:600px){
+ .projects-page-heading{align-items:flex-start;flex-direction:column;gap:24px;padding-bottom:25px}
+ .projects-view-switch{gap:27px;font-size:14px}
+ .project-list{width:calc(100% - 2 * var(--page));margin:18px var(--page) 90px}
+ .project-list-head,.project-list-row{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) 42px;column-gap:9px;padding-left:0;padding-right:0}
+ .project-list-head{font-size:11px}
+ .project-list-row{min-height:76px}
+ .list-project-name{font-size:17px}
+ .list-project-stage,.list-project-year{font-size:12px}
+}
+@media(hover:none){.project-list-preview{display:none}}
 </style>
 </head>
 <body>
@@ -192,7 +230,7 @@ var photos=[
 var stages=["Концепция","Проект","Реализация","Концепция","Проект","Рабочая документация","Проект","Реализация"];
 var years=["2026","2025","2024","2025","2023","2024","2026","2022"];
 var projects=photos.map(function(url,i){return {id:i,name:"Проект "+String(i+1).padStart(2,"0"),year:years[i],stage:stages[i],image:url,gallery:[url,photos[(i+3)%8],photos[(i+5)%8]]}});
-var app=document.getElementById("app"), timer=null, clearEvents=function(){};
+var app=document.getElementById("app"), timer=null, clearEvents=function(){}, projectView="grid";
 function page(id){window.location.hash="#/"+id}
 function img(url,alt){return '<img src="'+url+'" alt="'+alt+'" loading="lazy">'}
 function controls(){return '<div class="control-zone"><button class="arrow-zone prev" type="button" aria-label="Предыдущее изображение"><span class="arrow" aria-hidden="true">‹</span></button><button class="arrow-zone next" type="button" aria-label="Следующее изображение"><span class="arrow" aria-hidden="true">›</span></button></div>'}
@@ -213,14 +251,61 @@ var selected=projects.slice(0,4);
 app.innerHTML='<section class="intro" id="about"><div class="intro-brand"><div class="eyebrow brand-eyebrow">Архитектурное бюро. Москва</div><img class="home-logo" src="assets/yard-logo-horizontal.svg" alt="ЯРД — Архитектурное бюро"><p class="word-note">Yard (ja:d) Ярд — Двор, площадка, сад, парк.<br>Данное слово объединяет в себе совокупность пространств, с которыми чаще всего сталкивается ландшафтный архитектор в своей практике.</p></div><div class="intro-text"><p>Продвигаем идею осмысленной ландшафтной архитектуры, являющейся по своему характеру монументальной, знаковой, оставляющей заметный след в сфере</p><a class="text-link" href="#/projects">Смотреть проекты ↗</a></div></section><section class="hero" aria-label="Избранные проекты">'+selected.map(function(p,i){return '<div class="hero-slide'+(i===0?' active':'')+'" aria-hidden="'+(i!==0)+'"><a href="#/projects/'+p.id+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="hero-caption"><strong>'+p.name+'</strong><span>'+p.stage+' · '+p.year+'</span></div></a></div>'}).join("")+controls()+'<div class="counter">01 / 04</div></section><section class="closing"><p>Деятельность ландшафтного архитектора является созидательной, формирующей новый уровень представления об эстетике пространства и качестве городской среды, а также учитывает ключевые особенности современных условий деятельности самого архитектора.</p><a class="text-link" href="#/projects">Все проекты ↗</a></section>';
 bindSlideshow(app.querySelector(".hero"),selected.map(function(p){return p.image}),true)
 }
+function projectViewSwitch(view){
+var gridIcon='<svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="5" height="5"/><rect x="7.5" y="1" width="5" height="5"/><rect x="14" y="1" width="5" height="5"/><rect x="1" y="7.5" width="5" height="5"/><rect x="7.5" y="7.5" width="5" height="5"/><rect x="14" y="7.5" width="5" height="5"/><rect x="1" y="14" width="5" height="5"/><rect x="7.5" y="14" width="5" height="5"/><rect x="14" y="14" width="5" height="5"/></svg>';
+var listIcon='<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="currentColor"><rect x="1" y="2" width="4" height="4"/><rect x="7.5" y="3" width="11.5" height="2"/><rect x="1" y="8" width="4" height="4"/><rect x="7.5" y="9" width="11.5" height="2"/><rect x="1" y="14" width="4" height="4"/><rect x="7.5" y="15" width="11.5" height="2"/></svg>';
+return '<nav class="projects-view-switch" aria-label="Отображение проектов"><a class="view-tab'+(view==='grid'?' selected':'')+'" href="#/projects?view=grid"'+(view==='grid'?' aria-current="page"':'')+'>'+gridIcon+'<span>Сетка</span></a><a class="view-tab'+(view==='list'?' selected':'')+'" href="#/projects?view=list"'+(view==='list'?' aria-current="page"':'')+'>'+listIcon+'<span>Список</span></a></nav>'
+}
+function renderProjectsHeading(view){
+return '<header class="section-heading projects-page-heading"><h1>Проекты</h1>'+projectViewSwitch(view)+'</header>'
+}
+function showProjectListPreview(){
+var rows=app.querySelectorAll('.project-list-row');
+var preview=app.querySelector('.project-list-preview');
+if(!preview||!rows.length||!window.matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+var image=preview.querySelector('img');
+function follow(e){
+var width=preview.offsetWidth||240,height=preview.offsetHeight||300;
+var x=e.clientX+30,y=e.clientY-height*0.40;
+if(x+width>window.innerWidth-18)x=e.clientX-width-30;
+if(x<14)x=14;
+if(y+height>window.innerHeight-14)y=window.innerHeight-height-14;
+if(y<14)y=14;
+preview.style.transform='translate3d('+Math.round(x)+'px,'+Math.round(y)+'px,0)';
+}
+rows.forEach(function(row){
+row.addEventListener('pointerenter',function(e){
+if(e.pointerType!=='mouse'&&e.pointerType!=='pen')return;
+image.src=row.dataset.preview;
+preview.classList.add('visible');
+follow(e);
+});
+row.addEventListener('pointermove',function(e){if(preview.classList.contains('visible'))follow(e)});
+row.addEventListener('pointerleave',function(){preview.classList.remove('visible')});
+row.addEventListener('blur',function(){preview.classList.remove('visible')});
+});
+}
+function renderProjectList(){
+var rows=projects.map(function(p){
+return '<a class="project-list-row" href="#/projects/'+p.id+'" data-preview="'+p.image+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'"><span class="list-project-name">'+p.name+'</span><span class="list-project-stage">'+p.stage+'</span><span class="list-project-year">'+p.year+'</span></a>'
+}).join('');
+app.innerHTML=renderProjectsHeading('list')+
+'<section class="project-list" aria-label="Проекты списком"><div class="project-list-head" aria-hidden="true"><span>Проект</span><span>Стадия</span><span>Год</span></div><div class="project-list-body">'+rows+'</div></section>'+
+'<div class="project-list-preview" aria-hidden="true"><img alt=""></div>';
+app.dataset.mosaicColumns='list';
+showProjectListPreview()
+}
 function mosaicColumnCount(){return window.innerWidth<=600?1:(window.innerWidth<=900?2:3)}
-function allProjects(){
+function allProjects(view){
+projectView=view||projectView;
+if(projectView==='list'){renderProjectList();return}
+
 var formats=["horizontal","vertical","square","vertical","horizontal","square","square","horizontal"];
 var sizes=["large","small","medium","small","large","medium","medium","large"];
 var columnCount=mosaicColumnCount();
 var columns=[];for(var c=0;c<columnCount;c++)columns.push([]);
 projects.forEach(function(p,i){columns[i%columnCount].push(p)});
-app.innerHTML='<header class="section-heading"><div class="eyebrow">ПОРТФОЛИО / ЯРД</div><h1>Проекты</h1></header><section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+formats[index]+' size-'+sizes[index]+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="tile-info"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></div></a>'}).join("")+'</div>'}).join("")+'</section>';
+app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+formats[index]+' size-'+sizes[index]+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="tile-info"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></div></a>'}).join("")+'</div>'}).join("")+'</section>';
 app.dataset.mosaicColumns=String(columnCount)
 }
 function oneProject(p){
@@ -230,8 +315,8 @@ bindSlideshow(app.querySelector(".gallery"),p.gallery,false)
 }
 function privacy(){app.innerHTML='<section class="privacy"><h1>Cookie и конфиденциальность</h1><p>Это тестовая версия сайта ЯРД. Здесь нет рекламных или аналитических cookie. Чтобы не показывать уведомление повторно, мы сохраняем ваш выбор в памяти браузера (localStorage). При запуске полноценного сайта информация будет дополнена с учётом фактически подключённых сервисов.</p><p><a class="text-link" href="#/">← На главную</a></p></section>'}
 function contacts(){app.innerHTML='<section class="contacts"><div class="eyebrow">ЯРД / СВЯЗЬ</div><h1>Контакты</h1><div class="contact-grid"><div><small>НАПИШИТЕ НАМ</small><a class="email" href="mailto:yard.bureau@mail.ru">yard.bureau@mail.ru</a></div><div><small>БЮРО</small><p>Москва<br>Руководитель — Роман Зимин</p></div></div></section>'}
-function route(){clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"){allProjects()}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
-window.addEventListener("resize",function(){var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";if(r==="/projects"&&app.dataset.mosaicColumns!==String(mosaicColumnCount()))allProjects()});
+function route(){clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"||r.indexOf("/projects?")===0){var selectedView=/[?&]view=list(?:&|$)/.test(r)?"list":(/[?&]view=grid(?:&|$)/.test(r)?"grid":projectView);allProjects(selectedView)}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
+window.addEventListener("resize",function(){var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";if((r==="/projects"||r.indexOf("/projects?")===0)&&projectView==="grid"&&app.dataset.mosaicColumns!==String(mosaicColumnCount()))allProjects("grid")});
 window.addEventListener("hashchange",route);route();
 var cb=document.getElementById("cookieBanner");
 try{if(localStorage.getItem("yard-cookie-notice-closed")!=="1") cb.hidden=false;}catch(e){cb.hidden=false}
