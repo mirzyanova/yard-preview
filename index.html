@@ -158,6 +158,16 @@
 @media(max-width:600px){
   .home-logo{width:min(100%,365px)}
 }
+
+/* Vertical masonry rhythm: each column advances independently.
+   Next projects can enter the viewport even beside taller first-row images. */
+.mosaic{align-items:start;column-gap:clamp(65px,6.2vw,116px);row-gap:0}
+.mosaic .mosaic-column{display:flex;flex-direction:column;align-items:stretch;gap:clamp(72px,5.4vw,95px);min-width:0}
+.mosaic .mosaic-column .tile{flex:0 0 auto}
+@media(max-width:900px){.mosaic .mosaic-column{gap:clamp(55px,6.3vw,76px)}}
+@media(max-width:600px){.mosaic .mosaic-column{gap:58px}}
+/* Shift the entire left brand unit slightly left without changing the two-column grid. */
+@media(min-width:901px){.intro-brand{transform:translateX(-clamp(12px,1.3vw,24px))}}
 </style>
 </head>
 <body>
@@ -203,11 +213,15 @@ var selected=projects.slice(0,4);
 app.innerHTML='<section class="intro" id="about"><div class="intro-brand"><div class="eyebrow brand-eyebrow">Архитектурное бюро. Москва</div><img class="home-logo" src="assets/yard-logo-horizontal.svg" alt="ЯРД — Архитектурное бюро"><p class="word-note">Yard (ja:d) Ярд — Двор, площадка, сад, парк.<br>Данное слово объединяет в себе совокупность пространств, с которыми чаще всего сталкивается ландшафтный архитектор в своей практике.</p></div><div class="intro-text"><p>Продвигаем идею осмысленной ландшафтной архитектуры, являющейся по своему характеру монументальной, знаковой, оставляющей заметный след в сфере</p><a class="text-link" href="#/projects">Смотреть проекты ↗</a></div></section><section class="hero" aria-label="Избранные проекты">'+selected.map(function(p,i){return '<div class="hero-slide'+(i===0?' active':'')+'" aria-hidden="'+(i!==0)+'"><a href="#/projects/'+p.id+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="hero-caption"><strong>'+p.name+'</strong><span>'+p.stage+' · '+p.year+'</span></div></a></div>'}).join("")+controls()+'<div class="counter">01 / 04</div></section><section class="closing"><p>Деятельность ландшафтного архитектора является созидательной, формирующей новый уровень представления об эстетике пространства и качестве городской среды, а также учитывает ключевые особенности современных условий деятельности самого архитектора.</p><a class="text-link" href="#/projects">Все проекты ↗</a></section>';
 bindSlideshow(app.querySelector(".hero"),selected.map(function(p){return p.image}),true)
 }
+function mosaicColumnCount(){return window.innerWidth<=600?1:(window.innerWidth<=900?2:3)}
 function allProjects(){
 var formats=["horizontal","vertical","square","vertical","horizontal","square","square","horizontal"];
 var sizes=["large","small","medium","small","large","medium","medium","large"];
-var rows=[];for(var i=0;i<projects.length;i+=3){rows.push(projects.slice(i,i+3))}
-app.innerHTML='<header class="section-heading"><div class="eyebrow">ПОРТФОЛИО / ЯРД</div><h1>Проекты</h1></header><section class="mosaic" aria-label="Все проекты">'+rows.map(function(r){return '<div class="mosaic-row">'+r.map(function(p){var index=p.id, position=["left","center","right"][index%3];return '<a class="tile format-'+formats[index]+' size-'+sizes[index]+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="tile-info"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></div></a>'}).join("")+'</div>'}).join("")+'</section>'
+var columnCount=mosaicColumnCount();
+var columns=[];for(var c=0;c<columnCount;c++)columns.push([]);
+projects.forEach(function(p,i){columns[i%columnCount].push(p)});
+app.innerHTML='<header class="section-heading"><div class="eyebrow">ПОРТФОЛИО / ЯРД</div><h1>Проекты</h1></header><section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+formats[index]+' size-'+sizes[index]+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+img(p.image,'Демонстрационное фото, не проект ЯРД')+'<div class="tile-info"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></div></a>'}).join("")+'</div>'}).join("")+'</section>';
+app.dataset.mosaicColumns=String(columnCount)
 }
 function oneProject(p){
 var next=projects[(p.id+1)%projects.length];
@@ -217,6 +231,7 @@ bindSlideshow(app.querySelector(".gallery"),p.gallery,false)
 function privacy(){app.innerHTML='<section class="privacy"><h1>Cookie и конфиденциальность</h1><p>Это тестовая версия сайта ЯРД. Здесь нет рекламных или аналитических cookie. Чтобы не показывать уведомление повторно, мы сохраняем ваш выбор в памяти браузера (localStorage). При запуске полноценного сайта информация будет дополнена с учётом фактически подключённых сервисов.</p><p><a class="text-link" href="#/">← На главную</a></p></section>'}
 function contacts(){app.innerHTML='<section class="contacts"><div class="eyebrow">ЯРД / СВЯЗЬ</div><h1>Контакты</h1><div class="contact-grid"><div><small>НАПИШИТЕ НАМ</small><a class="email" href="mailto:yard.bureau@mail.ru">yard.bureau@mail.ru</a></div><div><small>БЮРО</small><p>Москва<br>Руководитель — Роман Зимин</p></div></div></section>'}
 function route(){clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"){allProjects()}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
+window.addEventListener("resize",function(){var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";if(r==="/projects"&&app.dataset.mosaicColumns!==String(mosaicColumnCount()))allProjects()});
 window.addEventListener("hashchange",route);route();
 var cb=document.getElementById("cookieBanner");
 try{if(localStorage.getItem("yard-cookie-notice-closed")!=="1") cb.hidden=false;}catch(e){cb.hidden=false}
