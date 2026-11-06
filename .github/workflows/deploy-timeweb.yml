@@ -32,10 +32,9 @@ jobs:
           python3 scripts/build_release.py --output dist --release "$GITHUB_SHA"
           python3 -c 'import pathlib,re; s=pathlib.Path("dist/index.html").read_text(); pathlib.Path("/tmp/yard-client.js").write_text(re.findall(r"<script>(.*?)</script>",s,re.S)[0])'
           node --check /tmp/yard-client.js
-      - name: Publish static design through certificate-verified FTPS
+      - name: Publish through HTTPS with the dedicated design-only account
         env:
-          FTP_HOST: ${{ secrets.TIMEWEB_FTP_HOST }}
-          FTP_USER: ${{ secrets.TIMEWEB_FTP_USER }}
-          FTP_PASSWORD: ${{ secrets.TIMEWEB_FTP_PASSWORD }}
+          YARD_DEPLOY_USER: ${{ secrets.YARD_DEPLOY_USER }}
+          YARD_DEPLOY_APP_PASSWORD: ${{ secrets.YARD_DEPLOY_APP_PASSWORD }}
           DEPLOY_OPERATION: ${{ inputs.operation || 'deploy' }}
         run: python3 scripts/deploy_timeweb.py --directory dist --operation "$DEPLOY_OPERATION"

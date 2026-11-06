@@ -21,6 +21,7 @@ function yard_project_caps(): array {
 
 function yard_setup(): void {
     $caps = yard_project_caps();
+    add_role('yard_deployer', 'Техническая публикация дизайна ЯРД', ['read' => true, 'yard_deploy' => true]);
     add_role('yard_editor', 'Редактор проектов ЯРД', array_merge(['read' => true, 'upload_files' => true], $caps));
     foreach (['administrator', 'yard_editor'] as $role_name) {
         $role = get_role($role_name);
@@ -244,3 +245,4 @@ add_action('template_redirect', function (): void { wp_safe_redirect(home_url('/
 
 require_once __DIR__ . '/contact.php';
 require_once __DIR__ . '/import.php';
+require_once __DIR__ . '/deploy.php';

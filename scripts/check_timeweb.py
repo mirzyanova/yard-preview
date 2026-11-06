@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Read-only preflight of the exact static copy and FTPS, without any credentials."""
-from ftplib import FTP_TLS
+from ftplib import FTP_TLS, error_perm
 from pathlib import Path
 import hashlib
 import ssl
@@ -22,7 +22,10 @@ for path in sorted(files):
 ftp=FTP_TLS(context=ssl.create_default_context(),timeout=20)
 try:
     ftp.connect('vh474.timeweb.ru',21)
-    ftp.auth()
-    print('FTPS TLS certificate and hostname: verified. No credentials used.')
+    try:
+        ftp.auth()
+        print('FTPS TLS certificate and hostname: verified. No credentials used.')
+    except error_perm as error:
+        print('FTPS is unavailable before authentication; no credentials were transmitted. Code deployment uses the restricted HTTPS API instead.')
 finally:
     ftp.close()

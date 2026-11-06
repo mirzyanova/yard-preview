@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Certificate-verified FTPS releases inside the restricted yard-static directory."""
+"""Publish static releases over HTTPS using a project-isolated WordPress account."""
 import argparse
-from ftplib import FTP_TLS, error_perm
-import hashlib, io, json, os, re, ssl, urllib.request
+import base64, hashlib, io, json, os, re, ssl, urllib.request, zipfile
 from pathlib import Path, PurePosixPath
 HOST='vh474.timeweb.ru'
 SITE='https://ch197840.tw1.ru/'
@@ -26,86 +25,45 @@ def validate_release(root):
         if not valid_path(path) or p.is_symlink() or hashlib.sha256(p.read_bytes()).hexdigest()!=digest: raise ValueError('Unsafe or changed release: '+path)
     return manifest
 
-def read_remote(ftp,path,missing_ok=False,limit=5000000):
-    data=bytearray()
-    def append(chunk):
-        data.extend(chunk)
-        if len(data)>limit: raise ValueError('Unexpected remote file size')
-    try: ftp.retrbinary('RETR '+path,append)
-    except error_perm as error:
-        if missing_ok and str(error).startswith('550'): return None
-        raise
-    return bytes(data)
-
-def mkdirs(ftp,path):
-    parts=PurePosixPath(path).parts
-    for i in range(1,len(parts)+1):
-        directory='/'.join(parts[:i])
-        try: ftp.mkd(directory)
-        except error_perm:
-            original=ftp.pwd(); ftp.cwd(directory); ftp.cwd(original)
-
-def atomic_write(ftp,path,data):
-    temporary=path+'.pending-'+os.environ.get('GITHUB_RUN_ID','')+'-'+os.urandom(4).hex()
-    ftp.storbinary('STOR '+temporary,io.BytesIO(data))
-    if read_remote(ftp,temporary)!=data: raise RuntimeError('Remote write verification failed')
-    ftp.rename(temporary,path)  # Require atomic replacement. Never delete the current file as a fallback.
-
-def verify_remote_release(ftp,release):
-    if not SHA.fullmatch(release): raise ValueError('Invalid remote release')
-    prefix='releases/'+release+'/'
-    manifest=json.loads(read_remote(ftp,prefix+'manifest.json',limit=100000))
-    if manifest.get('release')!=release or 'index.html' not in manifest.get('files',{}): raise ValueError('Invalid remote manifest')
-    for path,digest in manifest['files'].items():
-        if not valid_path(path): raise ValueError('Unsafe remote path')
-        if hashlib.sha256(read_remote(ftp,prefix+path)).hexdigest()!=digest: raise RuntimeError('Remote hash mismatch: '+path)
+def request_deploy(data, content_type, release=''):
+    user=os.environ.get('YARD_DEPLOY_USER','')
+    password=os.environ.get('YARD_DEPLOY_APP_PASSWORD','').replace(' ','')
+    if user!='yard-deployer' or len(password)<20: raise RuntimeError('Use only the dedicated yard-deployer application password')
+    authorization=base64.b64encode((user+':'+password).encode()).decode()
+    headers={'Authorization':'Basic '+authorization,'Content-Type':content_type,'User-Agent':'YARD-deployment/1.0'}
+    if release: headers['X-Yard-Release']=release
+    request=urllib.request.Request(SITE+'cms/?rest_route=/yard/v1/deploy',data=data,headers=headers,method='POST')
+    with urllib.request.urlopen(request,timeout=90,context=ssl.create_default_context()) as response:
+        result=json.loads(response.read(100000))
+        if result.get('ok') is not True or not SHA.fullmatch(result.get('release','')): raise RuntimeError('Deployment was not confirmed')
+        return result
 
 def health_check(release):
     request=urllib.request.Request(SITE+'?yard_release='+release,headers={'Cache-Control':'no-cache','User-Agent':'YARD-deployment-check/1.0'})
     with urllib.request.urlopen(request,timeout=25,context=ssl.create_default_context()) as response:
         if response.status!=200 or response.headers.get('X-Yard-Release')!=release or ('yard-release:'+release).encode() not in response.read(600000): raise RuntimeError('The website did not confirm the selected release')
-    api=urllib.request.Request(SITE+'cms/?rest_route=/yard/v1/projects',headers={'Cache-Control':'no-cache'})
-    with urllib.request.urlopen(api,timeout=25,context=ssl.create_default_context()) as response:
+    request=urllib.request.Request(SITE+'cms/?rest_route=/yard/v1/projects',headers={'Cache-Control':'no-cache'})
+    with urllib.request.urlopen(request,timeout=25,context=ssl.create_default_context()) as response:
         data=json.loads(response.read(2000000))
         if data.get('apiVersion')!=1 or not isinstance(data.get('projects'),list): raise RuntimeError('CMS did not confirm the project API')
 
 def run(root,operation):
-    host,user,password=(os.environ.get(k,'') for k in ['FTP_HOST','FTP_USER','FTP_PASSWORD'])
-    if host!=HOST or user=='ch197840' or not re.fullmatch(r'ch197840[a-zA-Z0-9_]{1,8}',user) or not password: raise RuntimeError('Use the verified host and a separate restricted account')
-    local=validate_release(root) if operation=='deploy' else None
-    ftp=FTP_TLS(context=ssl.create_default_context(),timeout=25)
-    try:
-        ftp.connect(host,21); ftp.auth(); ftp.login(user,password); ftp.prot_p(); ftp.set_pasv(True)
-        if read_remote(ftp,'.yard-deploy-root',limit=256)!=MARKER: raise RuntimeError('Wrong FTP directory: stopped')
-        previous=(read_remote(ftp,'current',missing_ok=True,limit=128) or b'').decode().strip()
-        if previous and not SHA.fullmatch(previous): raise RuntimeError('Invalid active release')
-        if operation=='rollback':
-            target=(read_remote(ftp,'previous',limit=128) or b'').decode().strip()
-            if not SHA.fullmatch(target): raise RuntimeError('No verified previous release')
-        else:
-            target=local['release']; prefix='releases/'+target+'/'
-            mkdirs(ftp,'releases/'+target)
-            existing=read_remote(ftp,prefix+'manifest.json',missing_ok=True,limit=100000)
-            if existing is not None:
-                if json.loads(existing)!=local: raise RuntimeError('A different immutable release exists')
-            else:
-                for path in sorted(local['files']):
-                    mkdirs(ftp,str(PurePosixPath(prefix+path).parent))
-                    atomic_write(ftp,prefix+path,(Path(root)/path).read_bytes())
-                atomic_write(ftp,prefix+'manifest.json',(Path(root)/'manifest.json').read_bytes())
-        verify_remote_release(ftp,target)
-        if previous and previous!=target: atomic_write(ftp,'previous',(previous+'\n').encode())
-        atomic_write(ftp,'current',(target+'\n').encode())
-        try: health_check(target)
-        except Exception:
-            if previous and previous!=target:
-                atomic_write(ftp,'current',(previous+'\n').encode())
-                print('Health check failed; the previous release pointer was restored.')
-            raise
-        print('Verified active release: '+target)
-    finally:
-        try: ftp.quit()
-        except Exception: ftp.close()
+    if operation=='rollback':
+        result=request_deploy(json.dumps({'operation':'rollback'}).encode(),'application/json')
+    else:
+        manifest=validate_release(root)
+        archive=io.BytesIO()
+        with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED) as zip:
+            for path in sorted(set(manifest['files'])|{'manifest.json'}): zip.write(Path(root)/path,path)
+        if archive.tell()>30*1024*1024: raise RuntimeError('Static release exceeds the server upload limit')
+        result=request_deploy(archive.getvalue(),'application/zip',manifest['release'])
+    try: health_check(result['release'])
+    except Exception:
+        if result.get('previous') and result['previous']!=result['release']:
+            restored=request_deploy(json.dumps({'operation':'rollback','expectedCurrent':result['release']}).encode(),'application/json')
+            print('Health check failed; restored the previous release: '+restored['release'])
+        raise
+    print('Verified active release: '+result['release'])
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser()

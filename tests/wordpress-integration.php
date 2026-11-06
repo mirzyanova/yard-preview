@@ -10,6 +10,7 @@ define('DB_CHARSET', 'utf8mb4'); define('DB_COLLATE', '');
 define('WP_SITEURL', 'http://yard.test/cms'); define('WP_HOME', 'http://yard.test/cms');
 // This installer and the tests share a process; set the URL before the empty DB is populated.
 define('WP_CONTENT_URL', 'http://yard.test/cms/wp-content');
+define('YARD_STATIC_ROOT', sys_get_temp_dir() . '/yard-static-ci-' . bin2hex(random_bytes(8)));
 foreach (['AUTH_KEY','SECURE_AUTH_KEY','LOGGED_IN_KEY','NONCE_KEY','AUTH_SALT','SECURE_AUTH_SALT','LOGGED_IN_SALT','NONCE_SALT'] as $key) { define($key, bin2hex(random_bytes(32))); }
 $table_prefix = 'wp_';
 define('ABSPATH', $core . '/');
@@ -70,4 +71,42 @@ $replayed = yard_contact_submit($request);
 yard_assert(is_wp_error($replayed) && $replayed->get_error_code() === 'yard_replay', 'Signed contact tokens cannot be replayed');
 $limited = yard_contact_submit($request);
 yard_assert(is_wp_error($limited) && $limited->get_error_data()['status'] === 429, 'Repeated submissions are rate limited');
+mkdir(YARD_STATIC_ROOT, 0700);
+file_put_contents(YARD_STATIC_ROOT . '/.yard-deploy-root', "YARD_STATIC_ONLY:ch197840.tw1.ru:v1\n");
+foreach (['../cms/wp-config.php','cms/wp-content/uploads/photo.jpg','assets/../x.jpg','assets/code.php','assets/code.phar','assets/.env',"assets/bad\nfile.js"] as $unsafe_path) {
+    yard_assert(!yard_static_path($unsafe_path), 'Deployment rejects: ' . str_replace("\n", '<newline>', $unsafe_path));
+}
+$deploy_request = new WP_REST_Request('POST', '/yard/v1/deploy');
+$deploy_request->set_header('Content-Type', 'application/zip');
+wp_set_current_user(0);
+yard_assert(rest_do_request($deploy_request)->get_status() === 401, 'Anonymous visitors cannot publish code');
+$deployer_id = wp_insert_user(['user_login'=>'yard-deployer','user_pass'=>wp_generate_password(40),'role'=>'yard_deployer']);
+wp_set_current_user($deployer_id);
+yard_assert(current_user_can('yard_deploy') && !current_user_can('edit_yard_projects') && !current_user_can('upload_files') && !current_user_can('manage_options'), 'Technical account can publish design without editing CMS data or photographs');
+update_option('yard_deploy_enabled', 1);
+$dist = dirname(__DIR__) . '/dist';
+$release_manifest = json_decode(file_get_contents($dist . '/manifest.json'), true, 512, JSON_THROW_ON_ERROR);
+function yard_ci_archive(string $dist, array $manifest, string $release, bool $unsafe = false): string {
+    $path = tempnam(sys_get_temp_dir(), 'yard-ci-zip');
+    $zip = new ZipArchive(); $zip->open($path, ZipArchive::OVERWRITE);
+    $original = $manifest['release']; $manifest['release'] = $release;
+    foreach ($manifest['files'] as $file => $hash) {
+        $data = file_get_contents($dist . '/' . $file);
+        if ($file === 'index.html') { $data = str_replace('yard-release:' . $original, 'yard-release:' . $release, $data); }
+        $manifest['files'][$file] = hash('sha256', $data); $zip->addFromString($file, $data);
+    }
+    if ($unsafe) { $zip->addFromString('cms/wp-config.php', 'not allowed'); $manifest['files']['cms/wp-config.php'] = hash('sha256', 'not allowed'); }
+    $zip->addFromString('manifest.json', wp_json_encode($manifest)); $zip->close();
+    $bytes = file_get_contents($path); unlink($path); return $bytes;
+}
+$release_a = $release_manifest['release']; $release_b = str_repeat('b', 40);
+$deploy_request->set_header('X-Yard-Release', $release_a);
+$deploy_request->set_body(yard_ci_archive($dist, $release_manifest, $release_a));
+$deployed = rest_do_request($deploy_request);
+yard_assert($deployed->get_status() === 200 && trim(file_get_contents(YARD_STATIC_ROOT . '/current')) === $release_a, 'Authenticated HTTPS deployment atomically activates a verified static release');
+yard_deploy_process('deploy', yard_ci_archive($dist, $release_manifest, $release_b), $release_b);
+try { yard_deploy_process('deploy', yard_ci_archive($dist, $release_manifest, str_repeat('c', 40), true), str_repeat('c', 40)); throw new RuntimeException('Unsafe archive was accepted'); }
+catch (RuntimeException $error) { yard_assert(trim(file_get_contents(YARD_STATIC_ROOT . '/current')) === $release_b, 'Rejected CMS path cannot replace the active site'); }
+$rollback = yard_deploy_process('rollback');
+yard_assert($rollback['release'] === $release_a && trim(file_get_contents(YARD_STATIC_ROOT . '/current')) === $release_a, 'Rollback restores the previous verified release');
 echo "WordPress integration checks passed. No emails were sent.\n";
