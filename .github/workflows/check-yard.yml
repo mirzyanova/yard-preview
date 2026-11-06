@@ -24,7 +24,7 @@ jobs:
           --health-timeout=5s
           --health-retries=10
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, verified 2026-11-06
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6, verified 2026-11-06
         with:
           persist-credentials: false
       - name: Check release boundaries and source adaptation
@@ -47,4 +47,4 @@ jobs:
           curl --fail --silent --show-error --location https://wordpress.org/wordpress-7.1.4.tar.gz.sha1 --output /tmp/yard-wordpress/core.sha1
           python3 -c 'import hashlib,pathlib; p=pathlib.Path("/tmp/yard-wordpress"); assert hashlib.sha1((p/"core.tar.gz").read_bytes()).hexdigest()==(p/"core.sha1").read_text().strip()'
           tar -xzf /tmp/yard-wordpress/core.tar.gz -C /tmp/yard-wordpress
-          php tests/wordpress-integration.php
+          php -d xdebug.mode=off tests/wordpress-integration.php

@@ -11,17 +11,24 @@ define('WP_SITEURL', 'http://yard.test/cms'); define('WP_HOME', 'http://yard.tes
 foreach (['AUTH_KEY','SECURE_AUTH_KEY','LOGGED_IN_KEY','NONCE_KEY','AUTH_SALT','SECURE_AUTH_SALT','LOGGED_IN_SALT','NONCE_SALT'] as $key) { define($key, bin2hex(random_bytes(32))); }
 $table_prefix = 'wp_';
 define('ABSPATH', $core . '/');
+$mu_dir = $core . '/wp-content/mu-plugins';
+if (!is_dir($mu_dir)) { mkdir($mu_dir, 0755, true); }
+file_put_contents($mu_dir . '/yard-ci.php', '<?php require ' . var_export(dirname(__DIR__) . '/cms/yard-projects/yard-projects.php', true) . ';');
 require ABSPATH . 'wp-settings.php';
 require ABSPATH . 'wp-admin/includes/upgrade.php';
 add_filter('pre_wp_mail', fn() => false);
 add_filter('pre_http_request', fn() => new WP_Error('ci_network_disabled', 'External requests disabled in integration tests.'));
 wp_install('YARD isolated tests', 'yard-ci-admin', 'test@example.invalid', false, '', wp_generate_password(40));
-require dirname(__DIR__) . '/cms/yard-projects/yard-projects.php';
-do_action('init'); yard_setup();
+wp_installing(false); yard_setup();
 $admin = get_user_by('login', 'yard-ci-admin'); wp_set_current_user($admin->ID);
 function yard_assert($value, $message): void { if (!$value) { throw new RuntimeException($message); } echo "PASS: $message\n"; }
 $import = yard_import_projects(dirname(__DIR__));
 $projects = yard_public_projects();
+if (count($projects) !== 2) {
+    $debug_posts = get_posts(['post_type'=>'yard_project','post_status'=>'any','posts_per_page'=>-1]);
+    $debug_media = get_posts(['post_type'=>'attachment','posts_per_page'=>-1]);
+    echo 'CI import diagnostic: ' . wp_json_encode(['import'=>$import,'site'=>site_url(),'posts'=>array_map(fn($p)=>['id'=>$p->ID,'status'=>$p->post_status,'cover'=>get_post_thumbnail_id($p->ID)],$debug_posts),'media'=>array_map(fn($m)=>['id'=>$m->ID,'mime'=>$m->post_mime_type,'url'=>wp_get_attachment_url($m->ID),'image'=>wp_get_attachment_image_src($m->ID,'yard_card')],array_slice($debug_media,0,2))]) . "\n";
+}
 yard_assert(count($projects) === 2, 'Only the two real projects are imported');
 yard_assert(array_column($projects, 'id') === [0,1], 'Existing project URLs retain their IDs');
 yard_assert(count($projects[0]['gallery']) === 3 && count($projects[1]['gallery']) === 8, 'All 11 original photographs are in the media library');
