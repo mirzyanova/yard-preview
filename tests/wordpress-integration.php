@@ -8,6 +8,8 @@ define('WP_INSTALLING', true); define('WP_DEBUG', true); define('WP_DEBUG_DISPLA
 define('DB_NAME', 'yard_test'); define('DB_USER', 'root'); define('DB_PASSWORD', ''); define('DB_HOST', '127.0.0.1:3306');
 define('DB_CHARSET', 'utf8mb4'); define('DB_COLLATE', '');
 define('WP_SITEURL', 'http://yard.test/cms'); define('WP_HOME', 'http://yard.test/cms');
+// This installer and the tests share a process; set the URL before the empty DB is populated.
+define('WP_CONTENT_URL', 'http://yard.test/cms/wp-content');
 foreach (['AUTH_KEY','SECURE_AUTH_KEY','LOGGED_IN_KEY','NONCE_KEY','AUTH_SALT','SECURE_AUTH_SALT','LOGGED_IN_SALT','NONCE_SALT'] as $key) { define($key, bin2hex(random_bytes(32))); }
 $table_prefix = 'wp_';
 define('ABSPATH', $core . '/');
