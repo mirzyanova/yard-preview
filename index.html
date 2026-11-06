@@ -296,6 +296,31 @@
 .gallery.gallery-portrait{background:#f8f8f7}
 .gallery.gallery-portrait .gallery-photo{object-fit:contain}
 .gallery.gallery-portrait .gallery-count{background:rgba(35,35,35,.64)}
+
+/* Consistent readable portfolio hover, preview shapes, and phone statistics. */
+.mosaic .tile-info{background:rgba(0,0,0,.48);opacity:0}
+.mosaic .tile:hover .tile-info,.mosaic .tile:focus-visible .tile-info{opacity:1}
+@media(hover:none){.mosaic .tile-info{opacity:1;background:linear-gradient(transparent 45%,rgba(0,0,0,.65))}}
+.project-list-preview{height:auto;aspect-ratio:1}
+.project-list-preview[data-format="horizontal"]{aspect-ratio:1.56}
+.project-list-preview[data-format="vertical"]{aspect-ratio:.78}
+.project-list-preview[data-format="square"]{aspect-ratio:1}
+.hero:hover .hero-slide.active .hero-caption,.hero:focus-within .hero-slide.active .hero-caption{opacity:1}
+@media(hover:none){.hero .hero-caption{opacity:1}}
+@media(max-width:900px){
+.yard-facts{grid-template-columns:1fr;gap:35px;padding-top:85px;padding-bottom:95px}
+.yard-facts-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.yard-fact{flex-direction:column;align-items:flex-start;gap:9px}
+.yard-fact strong{font-size:clamp(48px,7vw,72px)}
+.yard-fact span{font-size:13px}
+}
+@media(max-width:600px){
+.yard-facts{gap:28px;padding-top:70px;padding-bottom:85px}
+.yard-facts h2{font-size:27px;margin:0}
+.yard-facts-grid{gap:clamp(12px,3vw,20px)}
+.yard-fact strong{font-size:clamp(45px,13vw,66px)}
+.yard-fact span{font-size:clamp(11px,3vw,13px);line-height:1.4}
+}
 </style>
 </head>
 <body>
@@ -323,6 +348,12 @@ var projects=photos.map(function(url,i){return {id:i,name:"Проект "+String
 /* First real portfolio project. All three photographs are stored in this repository. */
 projects[0]={id:0,name:"Арт-объект ERFURT на бульваре ЗИЛАРТ",stage:"Реализация",year:"2024",location:"Москва, Россия",image:"erfurt-01.webp",gallery:["erfurt-01.webp","erfurt-02.webp","erfurt-03.webp"],description:""};
 projects[1]={id:1,name:"Клубный дом Форум",stage:"Реализация",year:"2025",location:"Москва, Россия",image:"assets/projects/forum/forum-01.webp",gallery:["assets/projects/forum/forum-01.webp","assets/projects/forum/forum-02.webp","assets/projects/forum/forum-03.webp","assets/projects/forum/forum-04.webp","assets/projects/forum/forum-05.webp","assets/projects/forum/forum-06.webp","assets/projects/forum/forum-07.webp","assets/projects/forum/forum-08.webp"],description:""};
+/* Planned CMS fields for independent card shape, homepage cover, visibility and ordering. */
+projects[0].cardFormat="horizontal";projects[0].homeImage=projects[0].image;projects[0].showOnHome=true;projects[0].homeOrder=0;projects[0].hasHorizontalHero=true;
+projects[1].cardFormat="vertical";projects[1].homeImage=null;projects[1].showOnHome=false;projects[1].homeOrder=1;projects[1].hasHorizontalHero=false;
+function projectCardFormat(p){return p.cardFormat||["horizontal","vertical","square","vertical","horizontal","square","square","horizontal"][p.id%8]||"square"}
+function homeProjects(){return projects.filter(function(p){return p.showOnHome!==false&&p.hasHorizontalHero!==false&&Boolean(p.homeImage||p.image)}).sort(function(a,b){return (Number.isFinite(a.homeOrder)?a.homeOrder:a.id)-(Number.isFinite(b.homeOrder)?b.homeOrder:b.id)}).slice(0,4)}
+function heroImage(p){return p.homeImage||p.image}
 var app=document.getElementById("app"), timer=null, clearEvents=function(){}, projectView="grid";
 function page(id){window.location.hash="#/"+id}
 function img(url,alt){var missing=url.indexOf("erfurt-")===0?' onerror="this.onerror=null;this.src=\'assets/erfurt-photo-pending.svg\'"':'';return '<img src="'+url+'" alt="'+alt+'" loading="lazy"'+missing+'>'}
@@ -340,10 +371,10 @@ var sx=0;root.ontouchstart=function(e){sx=e.changedTouches[0].screenX};root.onto
 start();clearEvents=stop;
 }
 function home(){
-var selected=projects.slice(0,4);
-app.innerHTML='<section class="intro" id="about"><div class="intro-brand"><div class="eyebrow brand-eyebrow">Архитектурное бюро. Москва</div><img class="home-logo" src="assets/yard-logo-horizontal.svg" alt="ЯРД — Архитектурное бюро"><p class="word-note">Yard (ja:d) Ярд — Двор, площадка, сад, парк.<br>Данное слово объединяет в себе совокупность пространств, с которыми чаще всего сталкивается ландшафтный архитектор в своей практике.</p></div><div class="intro-text"><p>Продвигаем идею осмысленной ландшафтной архитектуры, являющейся по своему характеру монументальной, знаковой, оставляющей заметный след в сфере</p><a class="text-link" href="#/projects">Смотреть проекты ↗</a></div></section><section class="hero" aria-label="Избранные проекты">'+selected.map(function(p,i){return '<div class="hero-slide'+(i===0?' active':'')+'" aria-hidden="'+(i!==0)+'"><a href="#/projects/'+p.id+'">'+img(p.image,p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'<div class="hero-caption"><strong>'+p.name+'</strong><span>'+p.stage+' · '+p.year+'</span></div></a></div>'}).join("")+controls()+'<div class="counter">01 / 04</div></section><section class="closing"><div class="closing-content"><h2>Новый взгляд на проект</h2><p>Главной ценностью ландшафтного бюро в процессе проектирования является формирование такого материала, который ёмко и полно описывает все качества проектируемого объекта в соответствии с принципами классовости и технологичности благоустройства.</p><p>Полнота проекта - есть важный критерий для достижения качественной реализации в полном соответствии с задумкой автора, действующего согласно с экономической моделью заказчика.</p><p>Проект является средством коммуникации или, даже можно сказать, языком, на котором говорит архитектор с остальными участниками проектирования. Наша цель - совершенствовать данный язык.</p></div><a class="text-link" href="#/projects">Все проекты ↗</a></section>'+
+var selected=homeProjects();
+app.innerHTML='<section class="intro" id="about"><div class="intro-brand"><div class="eyebrow brand-eyebrow">Архитектурное бюро. Москва</div><img class="home-logo" src="assets/yard-logo-horizontal.svg" alt="ЯРД — Архитектурное бюро"><p class="word-note">Yard (ja:d) Ярд — Двор, площадка, сад, парк.<br>Данное слово объединяет в себе совокупность пространств, с которыми чаще всего сталкивается ландшафтный архитектор в своей практике.</p></div><div class="intro-text"><p>Продвигаем идею осмысленной ландшафтной архитектуры, являющейся по своему характеру монументальной, знаковой, оставляющей заметный след в сфере</p><a class="text-link" href="#/projects">Смотреть проекты ↗</a></div></section><section class="hero" aria-label="Избранные проекты">'+selected.map(function(p,i){return '<div class="hero-slide'+(i===0?' active':'')+'" aria-hidden="'+(i!==0)+'"><a href="#/projects/'+p.id+'">'+img(heroImage(p),p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'<div class="hero-caption"><strong>'+p.name+'</strong><span>'+p.stage+' · '+p.year+'</span></div></a></div>'}).join("")+controls()+'<div class="counter">01 / '+String(selected.length).padStart(2,'0')+'</div></section><section class="closing"><div class="closing-content"><h2>Новый взгляд на проект</h2><p>Главной ценностью ландшафтного бюро в процессе проектирования является формирование такого материала, который ёмко и полно описывает все качества проектируемого объекта в соответствии с принципами классовости и технологичности благоустройства.</p><p>Полнота проекта - есть важный критерий для достижения качественной реализации в полном соответствии с задумкой автора, действующего согласно с экономической моделью заказчика.</p><p>Проект является средством коммуникации или, даже можно сказать, языком, на котором говорит архитектор с остальными участниками проектирования. Наша цель - совершенствовать данный язык.</p></div><a class="text-link" href="#/projects">Все проекты ↗</a></section>'+
 '<section class="yard-facts" aria-labelledby="yard-facts-title"><h2 id="yard-facts-title">ЯРД в цифрах</h2><div class="yard-facts-grid"><div class="yard-fact"><strong>13</strong><span>Лет опыта</span></div><div class="yard-fact"><strong>8</strong><span>Городов</span></div><div class="yard-fact"><strong>2</strong><span>Страны в портфолио</span></div></div></section>';
-bindSlideshow(app.querySelector(".hero"),selected.map(function(p){return p.image}),true)
+bindSlideshow(app.querySelector(".hero"),selected.map(heroImage),true)
 }
 function projectViewSwitch(view){
 var gridIcon='<svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="5" height="5"/><rect x="7.5" y="1" width="5" height="5"/><rect x="14" y="1" width="5" height="5"/><rect x="1" y="7.5" width="5" height="5"/><rect x="7.5" y="7.5" width="5" height="5"/><rect x="14" y="7.5" width="5" height="5"/><rect x="1" y="14" width="5" height="5"/><rect x="7.5" y="14" width="5" height="5"/><rect x="14" y="14" width="5" height="5"/></svg>';
@@ -371,6 +402,7 @@ preview.style.transform='translate3d('+Math.round(x)+'px,'+Math.round(y)+'px,0)'
 rows.forEach(function(row){
 row.addEventListener('pointerenter',function(e){
 if(e.pointerType!=='mouse'&&e.pointerType!=='pen')return;
+preview.dataset.format=row.dataset.format||'square';
 image.src=row.dataset.preview;
 preview.classList.add('visible');
 follow(e);
@@ -382,7 +414,7 @@ row.addEventListener('blur',function(){preview.classList.remove('visible')});
 }
 function renderProjectList(){
 var rows=projects.map(function(p){
-return '<a class="project-list-row" href="#/projects/'+p.id+'" data-preview="'+p.image+'" aria-label="'+p.name+', '+p.stage+', '+p.year+', локация: '+(p.location||'—')+'"><span class="list-project-name">'+p.name+'</span><span class="list-project-stage">'+p.stage+'</span><span class="list-project-year">'+p.year+'</span><span class="list-project-location">'+(p.location||'—')+'</span></a>'
+return '<a class="project-list-row" href="#/projects/'+p.id+'" data-preview="'+p.image+'" data-format="'+projectCardFormat(p)+'" aria-label="'+p.name+', '+p.stage+', '+p.year+', локация: '+(p.location||'—')+'"><span class="list-project-name">'+p.name+'</span><span class="list-project-stage">'+p.stage+'</span><span class="list-project-year">'+p.year+'</span><span class="list-project-location">'+(p.location||'—')+'</span></a>'
 }).join('');
 app.innerHTML=renderProjectsHeading('list')+
 '<section class="project-list" aria-label="Проекты списком"><div class="project-list-head" aria-hidden="true"><span>Проект</span><span>Стадия</span><span>Год</span><span>Локация</span></div><div class="project-list-body">'+rows+'</div></section>'+
@@ -395,12 +427,11 @@ function allProjects(view){
 projectView=view||projectView;
 if(projectView==='list'){renderProjectList();return}
 
-var formats=["horizontal","vertical","square","vertical","horizontal","square","square","horizontal"];
 var sizes=["large","small","medium","small","large","medium","medium","large"];
 var columnCount=mosaicColumnCount();
 var columns=[];for(var c=0;c<columnCount;c++)columns.push([]);
 projects.forEach(function(p,i){columns[i%columnCount].push(p)});
-app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+formats[index]+' size-'+sizes[index]+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+img(p.image,p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'<div class="tile-info"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></div></a>'}).join("")+'</div>'}).join("")+'</section>';
+app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+projectCardFormat(p)+' size-'+sizes[index%sizes.length]+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+img(p.image,p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'<div class="tile-info"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></div></a>'}).join("")+'</div>'}).join("")+'</section>';
 app.dataset.mosaicColumns=String(columnCount)
 }
 function oneProject(p){
