@@ -1,0 +1,50 @@
+name: Check YARD migration
+on:
+  push:
+    branches: [main, timeweb-migration]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: yard_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, verified 2026-11-06
+        with:
+          persist-credentials: false
+      - name: Check release boundaries and source adaptation
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Check PHP syntax
+        run: find cms server tests -name '*.php' -print0 | xargs -0 -r -n1 php -l
+      - name: Build and check browser JavaScript
+        run: |
+          python3 scripts/build_release.py --output dist --release "$GITHUB_SHA"
+          python3 -c 'import pathlib,re; s=pathlib.Path("dist/index.html").read_text(); pathlib.Path("/tmp/yard-client.js").write_text(re.findall(r"<script>(.*?)</script>",s,re.S)[0])'
+          node --check /tmp/yard-client.js
+          node --check cms/yard-projects/admin.js
+      - name: Verify behavior against official WordPress 7.1.4
+        env:
+          YARD_CI: '1'
+          YARD_TEST_CORE: /tmp/yard-wordpress/wordpress
+        run: |
+          mkdir -p /tmp/yard-wordpress
+          curl --fail --silent --show-error --location https://wordpress.org/wordpress-7.1.4.tar.gz --output /tmp/yard-wordpress/core.tar.gz
+          curl --fail --silent --show-error --location https://wordpress.org/wordpress-7.1.4.tar.gz.sha1 --output /tmp/yard-wordpress/core.sha1
+          python3 -c 'import hashlib,pathlib; p=pathlib.Path("/tmp/yard-wordpress"); assert hashlib.sha1((p/"core.tar.gz").read_bytes()).hexdigest()==(p/"core.sha1").read_text().strip()'
+          tar -xzf /tmp/yard-wordpress/core.tar.gz -C /tmp/yard-wordpress
+          php tests/wordpress-integration.php

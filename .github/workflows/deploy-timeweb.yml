@@ -1,71 +1,41 @@
-name: Deploy YARD to Timeweb (preview)
-
-# Run manually after a site-limited FTP user is set up and the three secrets exist.
-# Adding main-branch auto-trigger comes only after successful test deployment.
+name: Deploy YARD to Timeweb
 on:
   workflow_dispatch:
-
+    inputs:
+      operation:
+        description: Publish a static release or restore the previous one
+        required: true
+        type: choice
+        default: deploy
+        options: [deploy, rollback]
+  push:
+    branches: [main]
 permissions:
   contents: read
-
 concurrency:
   group: timeweb-preview
   cancel-in-progress: false
-
 jobs:
   deploy:
-    name: Upload YARD static site via encrypted FTPS
+    if: github.ref == 'refs/heads/main' && vars.TIMEWEB_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     environment: timeweb-preview
     steps:
-      - name: Check out the current YARD code
-        uses: actions/checkout@v4
-
-      - name: Build isolated static-only upload directory
-        shell: bash
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, verified 2026-11-06
+        with:
+          persist-credentials: false
+      - name: Validate release and PHP
         run: |
-          set -euo pipefail
-          mkdir -p dist
-          cp index.html dist/index.html
-          cp index.html dist/index.htm
-          cp -R assets dist/assets
-          find . -maxdepth 1 -type f -name '*.webp' -exec cp {} dist/ \;
-          if [[ -f robots.txt ]]; then cp robots.txt dist/robots.txt; fi
-          if [[ -f favicon.ico ]]; then cp favicon.ico dist/favicon.ico; fi
-          test -f dist/index.html
-          test -f dist/assets/projects/forum/forum-01.webp
-          test -f dist/erfurt-01.webp
-          echo "Prepared YARD files:"
-          find dist -type f | sort
-
-      - name: Install encrypted file transfer tool
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq lftp
-
-      - name: Publish using restricted Timeweb FTP user
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
+          find cms server -name '*.php' -print0 | xargs -0 -r -n1 php -l
+          python3 scripts/build_release.py --output dist --release "$GITHUB_SHA"
+          python3 -c 'import pathlib,re; s=pathlib.Path("dist/index.html").read_text(); pathlib.Path("/tmp/yard-client.js").write_text(re.findall(r"<script>(.*?)</script>",s,re.S)[0])'
+          node --check /tmp/yard-client.js
+      - name: Publish static design through certificate-verified FTPS
         env:
           FTP_HOST: ${{ secrets.TIMEWEB_FTP_HOST }}
           FTP_USER: ${{ secrets.TIMEWEB_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.TIMEWEB_FTP_PASSWORD }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -z "$FTP_HOST" || -z "$FTP_USER" || -z "$FTP_PASSWORD" ]]; then
-            echo "::error::Missing Timeweb FTP secrets; nothing was uploaded."
-            exit 1
-          fi
-          # The FTP user must be rooted in the target site's public_html.
-          # TLS is mandatory; intentionally never use --delete.
-          lftp -u "$FTP_USER,$FTP_PASSWORD" "ftp://$FTP_HOST" <<'LFTP'
-          set cmd:fail-exit yes
-          set ftp:ssl-force yes
-          set ftp:ssl-protect-data yes
-          set ftp:passive-mode yes
-          set ssl:verify-certificate yes
-          set net:max-retries 2
-          set net:timeout 25
-          mirror --reverse --verbose --only-newer --no-perms --parallel=2 dist/ .
-          bye
-          LFTP
+          DEPLOY_OPERATION: ${{ inputs.operation || 'deploy' }}
+        run: python3 scripts/deploy_timeweb.py --directory dist --operation "$DEPLOY_OPERATION"

@@ -1,0 +1,8 @@
+Options -Indexes -ExecCGI
+RemoveHandler .php .php3 .php4 .php5 .php7 .php8 .phtml .phar .cgi .pl
+<FilesMatch "(?i)\.(php[0-9]?|phtml|phar|cgi|pl)$">
+  Require all denied
+</FilesMatch>
+<FilesMatch "^(current|previous|\.yard-deploy-root)$">
+  Require all denied
+</FilesMatch>
