@@ -333,6 +333,36 @@
 .cookie-close{display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0}
 .cookie-close svg{display:block}
 @media(max-width:600px){.control-zone .arrow svg{width:32px;height:32px}.next-project .next-arrow svg{width:33px;height:33px}}
+
+/* Contacts: quiet editorial inquiry form, compatible with the future Timeweb mail endpoint. */
+.contact-form-section{border-top:1px solid #d8d8d8;margin-top:clamp(105px,11vw,170px);padding-top:clamp(65px,7vw,115px);display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1fr);gap:clamp(55px,8vw,165px)}
+.contact-form-heading .eyebrow{margin-bottom:28px}
+.contacts .contact-form-heading h2{font-size:clamp(32px,3.2vw,48px);line-height:1.2;letter-spacing:-.02em;font-weight:400;max-width:480px}
+.contact-form{min-width:0}
+.contact-form-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:25px;row-gap:34px}
+.contact-form-fields label{display:flex;flex-direction:column;gap:13px;font-size:13px;color:#333}
+.contact-form-fields input,.contact-form-fields textarea{width:100%;min-width:0;padding:14px 0;border:0;border-bottom:1px solid #bcbcbc;border-radius:0;background:transparent;color:var(--ink);font:400 16px/1.5 "Century Gothic","CenturyGothic",Arial,sans-serif;outline-offset:5px}
+.contact-form-fields input:focus,.contact-form-fields textarea:focus{border-color:#222;outline:none}
+.contact-form-fields input::placeholder,.contact-form-fields textarea::placeholder{color:#aaa}
+.contact-form-fields .contact-message-field{grid-column:1/-1}
+.contact-form-fields textarea{resize:vertical;min-height:110px}
+.contact-consent{display:flex;align-items:flex-start;gap:10px;margin:26px 0 32px;max-width:550px;font-size:12px;line-height:1.6;color:#777}
+.contact-consent input{accent-color:#333;margin:3px 0 0;flex:none}
+.contact-consent a{text-decoration:underline;text-underline-offset:3px}
+.contact-submit{display:inline-flex;align-items:center;justify-content:center;gap:20px;padding:15px 0;border:0;border-bottom:1px solid #222;background:transparent;color:#161616;font-size:15px;cursor:pointer}
+.contact-submit:hover{color:#777}
+.contact-submit .inline-arrow{width:19px;height:19px}
+.contact-form-note{margin:20px 0 0;font-size:12px;line-height:1.6;color:#777;max-width:500px}
+.contact-form-status{font-size:13px;line-height:1.55;color:#444}
+.contact-form-status:empty{display:none}
+@media(max-width:850px){.contact-form-section{grid-template-columns:1fr;gap:38px}}
+@media(max-width:600px){
+.contact-form-section{margin-top:95px;padding-top:65px}
+.contacts .contact-form-heading h2{font-size:35px}
+.contact-form-fields{grid-template-columns:1fr;row-gap:28px}
+.contact-form-fields .contact-message-field{grid-column:auto}
+.contact-form-fields input,.contact-form-fields textarea{font-size:16px}
+}
 </style>
 </head>
 <body>
@@ -455,8 +485,36 @@ var next=projects[(p.id+1)%projects.length];
 app.innerHTML='<article><header class="project-heading"><a class="back" href="#/projects">'+iconSvg("back","inline-arrow")+' Все проекты</a><h1>'+p.name+'</h1><div class="meta">'+p.stage+' · '+p.year+'</div></header><section class="gallery'+(p.id===1?' gallery-portrait':'')+'" aria-label="Галерея изображений"><img class="gallery-photo" src="'+p.gallery[0]+'" alt="'+(p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'">'+controls()+'<div class="gallery-count">01 / '+String(p.gallery.length).padStart(2,"0")+'</div></section>'+(p.id<=1?'':'<section class="detail"><div class="detail-label">О ПРОЕКТЕ</div><p>Демонстрационное описание. Здесь будет текст о замысле проекта, особенностях места и предложенных архитектурных решениях. В окончательной версии владелец бюро сможет редактировать его через административную панель.</p></section>')+'<a class="next-project" href="#/projects/'+next.id+'"><div><small>СЛЕДУЮЩИЙ ПРОЕКТ</small><strong>'+next.name+'</strong></div><span class="next-arrow">'+iconSvg("up-right")+'</span></a></article>';
 bindSlideshow(app.querySelector(".gallery"),p.gallery,false)
 }
-function privacy(){app.innerHTML='<section class="privacy"><h1>Cookie и конфиденциальность</h1><p>Это тестовая версия сайта ЯРД. Здесь нет рекламных или аналитических cookie. Уведомление появляется при каждом новом открытии сайта и не сохраняет отметку о закрытии. При запуске полноценного сайта информация будет дополнена с учётом фактически подключённых сервисов.</p><p><a class="text-link" href="#/">← На главную</a></p></section>'}
-function contacts(){app.innerHTML='<section class="contacts"><div class="contacts-heading"><h1>Контакты</h1><img class="contacts-logo" src="assets/yard-logo-horizontal.svg" alt="ЯРД — Архитектурное бюро"><p class="contacts-city">г. Москва</p></div><div class="contact-grid"><div><small>НАПИШИТЕ НАМ</small><a class="email" href="mailto:yard.bureau@mail.ru">yard.bureau@mail.ru</a></div><div><small>Руководитель бюро</small><p class="manager-name">Роман Зимин</p></div></div></section>'}
+function privacy(){app.innerHTML='<section class="privacy"><h1>Cookie и конфиденциальность</h1><p>Это тестовая версия сайта ЯРД. Здесь нет рекламных или аналитических cookie. Уведомление появляется при каждом новом открытии сайта и не сохраняет отметку о закрытии. Форма обратной связи в тестовой версии только подготавливает письмо в вашем почтовом приложении: введённые данные не сохраняются и не отправляются на сервер этого сайта. При запуске полноценного сайта добавим информацию об обработке обращений и реквизиты оператора персональных данных.</p><p><a class="text-link" href="#/">← На главную</a></p></section>'}
+function bindContactForm(){
+var form=app.querySelector("#yardContactForm");if(!form)return;
+form.addEventListener("submit",function(event){
+event.preventDefault();
+if(!form.reportValidity())return;
+var name=form.elements.namedItem("senderName").value.trim();
+var email=form.elements.namedItem("senderEmail").value.trim();
+var message=form.elements.namedItem("senderMessage").value.trim();
+var status=form.querySelector(".contact-form-status");
+if(!name||!email||!message){status.textContent="Заполните все поля.";return}
+var subject="Обращение с сайта ЯРД — "+name;
+var body=["Имя: "+name,"Email: "+email,"","Сообщение:",message].join("\n");
+status.textContent="Откроется почтовая программа. Проверьте подготовленное письмо и нажмите «Отправить». Пока сайт не отправляет сообщения автоматически.";
+window.location.href="mailto:yard.bureau@mail.ru?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+});
+}
+function contacts(){
+app.innerHTML='<section class="contacts"><div class="contacts-heading"><h1>Контакты</h1><img class="contacts-logo" src="assets/yard-logo-horizontal.svg" alt="ЯРД — Архитектурное бюро"><p class="contacts-city">г. Москва</p></div><div class="contact-grid"><div><small>НАПИШИТЕ НАМ</small><a class="email" href="mailto:yard.bureau@mail.ru">yard.bureau@mail.ru</a></div><div><small>Руководитель бюро</small><p class="manager-name">Роман Зимин</p></div></div>'+
+'<section class="contact-form-section" aria-labelledby="yard-contact-title"><div class="contact-form-heading"><div class="eyebrow">ОБРАТНАЯ СВЯЗЬ</div><h2 id="yard-contact-title">Расскажите о вашем проекте</h2></div>'+
+'<form id="yardContactForm" class="contact-form"><div class="contact-form-fields">'+
+'<label for="yardSenderName">Ваше имя<input id="yardSenderName" name="senderName" type="text" autocomplete="name" maxlength="120" required placeholder="Как к вам обращаться"></label>'+
+'<label for="yardSenderEmail">Электронная почта<input id="yardSenderEmail" name="senderEmail" type="email" autocomplete="email" maxlength="180" required placeholder="name@example.com"></label>'+
+'<label class="contact-message-field" for="yardSenderMessage">Сообщение<textarea id="yardSenderMessage" name="senderMessage" rows="5" minlength="10" maxlength="5000" required placeholder="Коротко расскажите о задаче"></textarea></label></div>'+
+'<label class="contact-consent"><input type="checkbox" name="consent" required><span>Согласен(на) на использование указанных данных для ответа на обращение. <a href="#/privacy">Подробнее о конфиденциальности</a></span></label>'+
+'<button type="submit" class="contact-submit">Подготовить письмо '+iconSvg("up-right","inline-arrow")+'</button>'+
+'<p class="contact-form-note">В тестовой версии кнопка открывает вашу почтовую программу с подготовленным письмом. После переноса на Timeweb настроим прямую отправку на почту бюро.</p>'+
+'<p class="contact-form-status" role="status" aria-live="polite"></p></form></section></section>';
+bindContactForm();
+}
 function route(){clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"||r.indexOf("/projects?")===0){var selectedView=/[?&]view=list(?:&|$)/.test(r)?"list":(/[?&]view=grid(?:&|$)/.test(r)?"grid":projectView);allProjects(selectedView)}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
 window.addEventListener("resize",function(){var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";if((r==="/projects"||r.indexOf("/projects?")===0)&&projectView==="grid"&&app.dataset.mosaicColumns!==String(mosaicColumnCount()))allProjects("grid")});
 window.addEventListener("hashchange",route);route();
