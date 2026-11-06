@@ -12,7 +12,7 @@ function bindContactForm(){
   var token=null;
   async function refreshToken(){
     token=null;button.disabled=true;
-    try{token=await yardRequest('contact-token');if(form.isConnected)button.disabled=false;}
+    try{token=await yardRequest('contact-token');if(token.version!==yardLegal.version)throw new Error('Consent document changed');if(form.isConnected)button.disabled=false;}
     catch(error){if(form.isConnected)status.textContent='Форма сейчас недоступна. Напишите на yard.bureau@mail.ru.';}
   }
   if(ready)refreshToken();

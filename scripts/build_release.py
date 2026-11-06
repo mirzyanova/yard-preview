@@ -44,6 +44,7 @@ def build(output, release_id, fixture=None):
     html = once(html, 'else if(r==="/privacy"){privacy()}', 'else if(r==="/privacy"){privacy()}else if(r==="/consent"){yardLegalPage(true)}')
     html = once(html, 'function bindSlideshow(root,images,autoplay){', 'function bindSlideshow(root,images,autoplay){\nif(!root||!images.length){if(root)root.hidden=true;return;}')
     html = once(html, 'if(autoplay&&!window.matchMedia', 'if(autoplay&&images.length>1&&!window.matchMedia')
+    html = once(html, 'function show(n){', 'if(photo){photo.onload=function(){root.classList.toggle("gallery-portrait",this.naturalHeight>this.naturalWidth)};if(photo.complete&&photo.naturalWidth)photo.onload();}\nfunction show(n){')
     html = once(html, 'if(photo){photo.onerror=', 'if(photo){photo.onload=function(){root.classList.toggle("gallery-portrait",this.naturalHeight>this.naturalWidth)};photo.onerror=')
     # The source remains the design authority; no CSS is changed during adaptation.
     source_css = re.search(r'<style>(.*?)</style>', source, re.S).group(1)
