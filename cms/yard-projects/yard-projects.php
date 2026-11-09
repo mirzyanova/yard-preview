@@ -8,7 +8,7 @@
  */
 defined('ABSPATH') || exit;
 
-const YARD_PROJECTS_VERSION = '1.0.0';
+const YARD_PROJECTS_VERSION = '1.0.1';
 
 function yard_project_caps(): array {
     return array_fill_keys([
@@ -52,7 +52,7 @@ add_action('init', function (): void {
     add_theme_support('post-thumbnails');
     add_image_size('yard_card', 1200, 1600, false);
     add_image_size('yard_large', 2400, 2400, false);
-    foreach (['year', 'stage', 'location', 'card_format', 'gallery_ids', 'home_image', 'show_home', 'home_order'] as $field) {
+    foreach (['year', 'stage', 'location', 'card_format', 'gallery_ids', 'home_image', 'home_crop_x', 'home_crop_y', 'show_home', 'home_order'] as $field) {
         register_post_meta('yard_project', '_yard_' . $field, [
             'single' => true, 'type' => 'string', 'show_in_rest' => false, 'revisions_enabled' => true,
             'auth_callback' => function ($allowed, $key, $post_id): bool { return current_user_can('edit_post', (int) $post_id); },
@@ -100,9 +100,8 @@ function yard_image_id($id): int {
     if (yard_is_editor() && get_post_meta($id, '_yard_media', true) !== '1') { return 0; }
     return $id;
 }
-function yard_horizontal(int $id): bool {
-    $meta = wp_get_attachment_metadata($id);
-    return is_array($meta) && ($meta['width'] ?? 0) > ($meta['height'] ?? 0) * 1.2;
+function yard_crop_position($value): int {
+    return is_numeric($value) ? max(0, min(100, (int) $value)) : 50;
 }
 function yard_gallery_ids($value): array {
     $ids = is_array($value) ? $value : explode(',', (string) $value);
@@ -134,10 +133,10 @@ function yard_project_box(WP_Post $post): void {
     }
     echo '</select></label></div><hr>';
     yard_media_control('cover', 'Основная фотография карточки', get_post_thumbnail_id($post->ID));
-    yard_media_control('home_image', 'Отдельная горизонтальная фотография для главной', absint($v('home_image')));
+    yard_media_control('home_image', 'Фотография для главной', absint($v('home_image')));
     echo '<p><label><input type="checkbox" name="yard_show_home" value="1"' . checked($v('show_home'), '1', false) . '> Показывать в слайдшоу на главной</label></p>';
-    echo '<p class="description">В слайдшоу попадёт только опубликованный проект с выбранным горизонтальным фото (ширина больше высоты минимум на 20%).</p>';
-    echo '<p><label>Порядок на главной <input type="number" name="yard_home_order" min="0" max="100000" value="' . absint($v('home_order')) . '"></label></p><hr><h3>Галерея</h3><p>Выберите или загрузите несколько фотографий сразу. Перетаскивайте их или используйте стрелки для изменения порядка.</p>';
+    echo '<p class="description">Подойдёт фото любых пропорций. WordPress предложит кадр по центру, который можно сдвинуть в предпросмотре.</p>';
+    echo '<p><label>Порядок на главной <input type="number" name="yard_home_order" min="0" max="100000" value="' . absint($v('home_order')) . '"></label></p><hr><h3>Галерея</h3><p>Добавьте кадры, которые должны быть на странице проекта. Если нужна и обложка, выберите её здесь из медиатеки. Если галерея пустая, на странице покажется только обложка. Перетаскивайте кадры или используйте стрелки для изменения порядка.</p>';
     echo '<input type="hidden" name="yard_gallery_ids" id="yard-gallery-ids" value="' . esc_attr(implode(',', yard_gallery_ids($v('gallery_ids')))) . '"><ul id="yard-gallery">';
     foreach (yard_gallery_ids($v('gallery_ids')) as $id) {
         echo '<li data-id="' . $id . '">' . wp_get_attachment_image($id, 'thumbnail') . '<div><button type="button" class="button yard-up" aria-label="Раньше">↑</button> <button type="button" class="button yard-down" aria-label="Позже">↓</button> <button type="button" class="button yard-remove">Убрать</button></div></li>';
@@ -145,7 +144,17 @@ function yard_project_box(WP_Post $post): void {
     echo '</ul><button type="button" class="button" id="yard-add-gallery">Добавить фотографии</button>';
 }
 function yard_media_control(string $field, string $label, int $id): void {
-    echo '<div class="yard-media-control" data-field="' . esc_attr($field) . '"><h3>' . esc_html($label) . '</h3><input type="hidden" name="yard_' . esc_attr($field) . '" value="' . $id . '"><div class="yard-media-preview">' . ($id ? wp_get_attachment_image($id, 'thumbnail') : '') . '</div><button type="button" class="button yard-pick-image">Выбрать / загрузить</button> <button type="button" class="button yard-clear-image">Убрать</button></div>';
+    $is_home = $field === 'home_image';
+    echo '<div class="yard-media-control" data-field="' . esc_attr($field) . '"><h3>' . esc_html($label) . '</h3><input type="hidden" name="yard_' . esc_attr($field) . '" value="' . $id . '"><div class="yard-media-preview">' . ($id ? wp_get_attachment_image($id, $is_home ? 'yard_large' : 'thumbnail') : '') . '</div><button type="button" class="button yard-pick-image">Выбрать / загрузить</button> <button type="button" class="button yard-clear-image">Убрать</button>';
+    if ($is_home) {
+        echo '<div class="yard-crop-controls"' . ($id ? '' : ' hidden') . '><p>Сдвиг кадра для главной</p>';
+        foreach (['x' => 'Влево / вправо', 'y' => 'Вверх / вниз'] as $axis => $label) {
+            $position = yard_crop_position(get_post_meta(get_the_ID(), '_yard_home_crop_' . $axis, true));
+            echo '<label>' . esc_html($label) . ' <input type="range" name="yard_home_crop_' . $axis . '" min="0" max="100" value="' . $position . '"></label>';
+        }
+        echo '<button type="button" class="button yard-center-crop">По центру</button></div>';
+    }
+    echo '</div>';
 }
 add_action('admin_enqueue_scripts', function (): void {
     $screen = get_current_screen();
@@ -170,7 +179,10 @@ add_action('save_post_yard_project', function ($id): void {
     foreach (array_unique(array_merge($gallery, [$cover])) as $media_id) { if ($media_id) { update_post_meta($media_id, '_yard_media', '1'); } }
     $home = yard_image_id($read('home_image'));
     update_post_meta($id, '_yard_home_image', (string) $home);
-    update_post_meta($id, '_yard_show_home', $read('show_home') === '1' && $home && yard_horizontal($home) ? '1' : '0');
+    foreach (['x', 'y'] as $axis) {
+        update_post_meta($id, '_yard_home_crop_' . $axis, (string) yard_crop_position($read('home_crop_' . $axis)));
+    }
+    update_post_meta($id, '_yard_show_home', $read('show_home') === '1' ? '1' : '0');
     update_post_meta($id, '_yard_home_order', (string) min(100000, absint($read('home_order'))));
     // Updating menu_order directly avoids recursively invoking save_post.
     global $wpdb;
@@ -191,7 +203,7 @@ function yard_public_projects(): array {
         $gallery = array_values(array_filter(array_map('yard_media', $gallery_ids)));
         if (!$gallery) { $gallery = [$cover]; }
         $home_id = absint($get('home_image'));
-        $home = $home_id && yard_horizontal($home_id) ? yard_media($home_id) : null;
+        $home = $home_id ? yard_media($home_id) : null;
         $format = $get('card_format');
         if (!in_array($format, ['horizontal', 'vertical', 'square'], true)) {
             $ratio = $cover['width'] / max(1, $cover['height']);
@@ -205,6 +217,7 @@ function yard_public_projects(): array {
             'image' => $cover['url'], 'cover' => $cover, 'gallery' => array_column($gallery, 'url'), 'galleryMedia' => $gallery,
             'cardFormat' => $format, 'homeImage' => $home['url'] ?? null,
             'showOnHome' => $get('show_home') === '1' && $home !== null, 'hasHorizontalHero' => $home !== null,
+            'homeCropX' => yard_crop_position($get('home_crop_x')), 'homeCropY' => yard_crop_position($get('home_crop_y')),
             'homeOrder' => (int) $get('home_order'), 'order' => (int) $post->menu_order,
         ];
     }
