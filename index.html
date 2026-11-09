@@ -478,6 +478,55 @@
  .project-story-description .detail-body{font-size:15px;line-height:1.7}
 }
 @media(prefers-reduced-motion:reduce){.project-gallery-canvas,.project-gallery-thumb{transition:none}}
+
+/* Portfolio v2 — a measured two-column editorial grid with wide anchor projects.
+   Three WordPress sizes map to large/full-width, medium/column, small/reduced column. */
+.mosaic.yard-index{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:row;align-items:start;column-gap:clamp(30px,3.2vw,56px);row-gap:clamp(72px,7.2vw,125px);width:calc(100% - 2 * var(--page));max-width:none;margin:0 var(--page);padding-bottom:clamp(110px,12vw,190px)}
+.mosaic.yard-index .tile{display:block;position:relative;grid-column:span 1;align-self:start;justify-self:stretch!important;width:100%!important;min-width:0;aspect-ratio:auto!important;background:#fff;overflow:visible;box-shadow:none}
+.mosaic.yard-index .tile.size-large{grid-column:1/-1;width:100%!important;justify-self:stretch!important}
+.mosaic.yard-index .tile.size-large.format-square{width:min(76%,1020px)!important;justify-self:center!important}
+.mosaic.yard-index .tile.size-large.format-vertical{width:min(52%,760px)!important;justify-self:center!important}
+.mosaic.yard-index .tile.size-small{width:80%!important}
+.mosaic.yard-index .tile.size-small.align-left{justify-self:start!important}
+.mosaic.yard-index .tile.size-small.align-right{justify-self:end!important}
+.mosaic.yard-index .tile-visual{display:block;position:relative;width:100%;height:auto;overflow:hidden;transform-origin:center;transition:transform .4s cubic-bezier(.2,.65,.22,1)}
+.mosaic.yard-index .tile.format-horizontal .tile-visual{aspect-ratio:1.56}
+.mosaic.yard-index .tile.format-square .tile-visual{aspect-ratio:1}
+.mosaic.yard-index .tile.format-vertical .tile-visual{aspect-ratio:.78}
+.mosaic.yard-index .tile.size-large.format-horizontal .tile-visual{aspect-ratio:2.05}
+.mosaic.yard-index .tile-visual img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover}
+.mosaic.yard-index .tile:hover .tile-visual,.mosaic.yard-index .tile:focus-visible .tile-visual{transform:scale(1.014)}
+.mosaic.yard-index .tile-caption{position:static;display:flex;flex-direction:column;gap:5px;padding-top:15px;min-height:68px;opacity:0;transform:none;transition:opacity .2s ease;background:transparent;color:#1d1d1d;pointer-events:none}
+.mosaic.yard-index .tile:hover .tile-caption,.mosaic.yard-index .tile:focus-visible .tile-caption{opacity:1}
+.mosaic.yard-index .tile-caption strong{font-family:"Sitka Text",Cambria,Georgia,serif;font-size:clamp(16px,1.32vw,20px);font-weight:400;line-height:1.27;letter-spacing:-.008em}
+.mosaic.yard-index .tile-caption small{font-size:11px;color:#777;line-height:1.45}
+@media(hover:none){.mosaic.yard-index .tile-caption{opacity:1}}
+@media(max-width:900px){
+ .mosaic.yard-index{column-gap:clamp(22px,3.7vw,35px);row-gap:clamp(53px,6.5vw,78px)}
+ .mosaic.yard-index .tile.size-small{width:87%!important}
+ .mosaic.yard-index .tile.size-large.format-vertical{width:65%!important}
+}
+@media(max-width:650px){
+ .mosaic.yard-index{grid-template-columns:minmax(0,1fr);column-gap:0;row-gap:clamp(45px,9vw,68px)}
+ .mosaic.yard-index .tile,.mosaic.yard-index .tile.size-large{grid-column:1/-1}
+ .mosaic.yard-index .tile.size-large.format-square,.mosaic.yard-index .tile.size-large.format-vertical{width:100%!important}
+ .mosaic.yard-index .tile.size-small{width:87%!important;justify-self:center!important}
+ .mosaic.yard-index .tile.size-large.format-horizontal .tile-visual{aspect-ratio:1.56}
+ .mosaic.yard-index .tile-caption{min-height:61px;padding-top:11px}
+ .mosaic.yard-index .tile-caption strong{font-size:18px}
+}
+/* Slider arrows only reveal over outer quarters of the photograph itself.
+   Not over empty white margins, thumbnail strip or the central half. */
+.project-gallery-photo{position:relative;display:inline-flex;align-items:center;justify-content:center;max-width:100%;max-height:100%;width:max-content;height:auto;line-height:0}
+.project-gallery-photo .project-gallery-image{display:block;width:auto;height:auto;max-width:100%;max-height:min(76svh,800px);object-fit:contain}
+.project-gallery-photo .project-gallery-arrow{position:absolute;top:0;bottom:0;transform:none;width:25%;height:100%;min-width:0;min-height:0;padding:clamp(8px,1.5vw,22px);box-sizing:border-box;z-index:3;display:flex;align-items:center;border:0;background:transparent;color:#fff;mix-blend-mode:difference;opacity:0;transition:opacity .16s ease;cursor:pointer}
+.project-gallery-photo .project-gallery-prev{left:0;right:auto;justify-content:flex-start}
+.project-gallery-photo .project-gallery-next{right:0;left:auto;justify-content:flex-end}
+@media(hover:hover){.project-gallery-photo .project-gallery-arrow:hover,.project-gallery-photo .project-gallery-arrow:focus-visible{opacity:1}}
+@media(hover:none){.project-gallery-photo .project-gallery-arrow{opacity:1}}
+@media(max-width:900px){.project-gallery-photo .project-gallery-image{max-height:min(67svh,660px)}}
+@media(max-width:600px){.project-gallery-photo .project-gallery-image{max-height:min(58svh,490px)}.project-gallery-photo .project-gallery-arrow{padding:5px}}
+@media(prefers-reduced-motion:reduce){.mosaic.yard-index .tile-visual,.mosaic.yard-index .tile-caption,.project-gallery-photo .project-gallery-arrow{transition:none}}
 </style>
 </head>
 <body>
