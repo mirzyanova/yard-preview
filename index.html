@@ -364,30 +364,41 @@
 .contact-form-fields input,.contact-form-fields textarea{font-size:16px}
 }
 
-/* 2026-11-09: editorial portfolio rhythm, same outer axes and independent masonry columns. */
-.mosaic{column-gap:clamp(26px,3.1vw,50px)}
-.mosaic-row .tile.size-small{width:88% !important}
-.mosaic-row .tile.size-medium{width:94% !important}
-.mosaic-row .tile.size-large{width:100% !important}
-.mosaic .tile{overflow:visible}
-.mosaic .tile-visual{display:block;width:100%;height:100%;overflow:hidden;transition:transform .42s cubic-bezier(.2,.68,.2,1);transform-origin:center}
-.mosaic .tile-visual img{width:100%;height:100%;object-fit:cover;display:block;transition:none}
-.mosaic .tile:hover .tile-visual,.mosaic .tile:focus-visible .tile-visual{transform:scale(1.028)}
+/* YARD portfolio composition: three editorial scales, consistent rails, balanced masonry. */
+.mosaic{column-gap:clamp(28px,3.1vw,52px);padding-bottom:clamp(105px,10vw,165px)}
+.mosaic .mosaic-column{gap:clamp(44px,5vw,78px)}
+.mosaic .mosaic-column .tile{aspect-ratio:auto !important;background:transparent;overflow:visible;flex:0 0 auto}
+.mosaic .mosaic-column .tile.size-small{width:80% !important}
+.mosaic .mosaic-column .tile.size-medium{width:91% !important}
+.mosaic .mosaic-column .tile.size-large{width:100% !important}
+.mosaic .tile-visual{display:block;width:100%;height:auto;position:relative;overflow:hidden;transition:transform .36s cubic-bezier(.2,.65,.22,1);transform-origin:center}
+.mosaic .tile.format-horizontal .tile-visual{aspect-ratio:1.56}
+.mosaic .tile.format-vertical .tile-visual{aspect-ratio:.78}
+.mosaic .tile.format-square .tile-visual{aspect-ratio:1}
+.mosaic .tile-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:none}
+.mosaic .tile:hover .tile-visual,.mosaic .tile:focus-visible .tile-visual{transform:scale(1.018)}
 .mosaic .tile:hover img{transform:none}
-.mosaic .tile-caption{display:flex;flex-direction:column;gap:4px;position:absolute;top:calc(100% + 13px);left:0;right:0;color:var(--ink);opacity:0;transform:translateY(-4px);transition:opacity .24s ease,transform .24s ease;pointer-events:none}
-.mosaic .tile:hover .tile-caption,.mosaic .tile:focus-visible .tile-caption{opacity:1;transform:translateY(0)}
-.mosaic .tile-caption strong{font-family:"Sitka Text",Cambria,Georgia,serif;font-size:clamp(17px,1.38vw,22px);font-weight:400;line-height:1.25;letter-spacing:-.012em}
-.mosaic .tile-caption small{font-size:12px;color:#777;line-height:1.4}
+.mosaic .tile-caption{display:flex;position:static;flex-direction:column;align-items:flex-start;gap:3px;width:100%;min-height:56px;padding-top:11px;color:var(--ink);opacity:0;transform:none;transition:opacity .22s ease;pointer-events:none}
+.mosaic .tile:hover .tile-caption,.mosaic .tile:focus-visible .tile-caption{opacity:1;transform:none}
+.mosaic .tile-caption strong{font-family:"Sitka Text",Cambria,Georgia,serif;font-size:clamp(13px,1.12vw,16px);font-weight:400;line-height:1.3;letter-spacing:0;max-width:100%;overflow-wrap:break-word}
+.mosaic .tile-caption small{font-size:11px;line-height:1.4;color:#777;max-width:100%}
 @media(hover:none){.mosaic .tile-caption{opacity:1;transform:none}}
 @media(max-width:900px){
- .mosaic{column-gap:clamp(21px,3.8vw,36px)}
- .mosaic .mosaic-column{gap:clamp(86px,8.5vw,112px)}
+ .mosaic{column-gap:clamp(22px,4vw,36px)}
+ .mosaic .mosaic-column{gap:clamp(44px,6vw,62px)}
+ .mosaic .mosaic-column .tile.size-small{width:85% !important}
+ .mosaic .mosaic-column .tile.size-medium{width:94% !important}
+ .mosaic .mosaic-column .tile.size-large{width:100% !important}
+ .mosaic .tile-caption strong{font-size:14px}
 }
 @media(max-width:600px){
- .mosaic .mosaic-column{gap:92px}
- .mosaic .tile-caption{top:calc(100% + 10px)}
- .mosaic .tile-caption strong{font-size:19px}
- .mosaic .tile-caption small{font-size:12px}
+ .mosaic .mosaic-column{gap:48px}
+ .mosaic .mosaic-column .tile.size-small{width:90% !important}
+ .mosaic .mosaic-column .tile.size-medium{width:96% !important}
+ .mosaic .mosaic-column .tile.size-large{width:100% !important}
+ .mosaic .tile-caption{padding-top:10px;min-height:51px}
+ .mosaic .tile-caption strong{font-size:15px}
+ .mosaic .tile-caption small{font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){.mosaic .tile-visual,.mosaic .tile-caption{transition:none}}
 </style>
@@ -499,11 +510,13 @@ function allProjects(view){
 projectView=view||projectView;
 if(projectView==='list'){renderProjectList();return}
 
-var sizes=["large","small","medium","small","large","medium","medium","large"];
+/* A curated size rhythm is the default; the CMS may override per project. */
+var sizes=["large","medium","large","medium","large","medium","small","large"];
+function projectCardSize(p,index){return ["small","medium","large"].includes(p.cardSize)?p.cardSize:sizes[index%sizes.length]}
 var columnCount=mosaicColumnCount();
 var columns=[];for(var c=0;c<columnCount;c++)columns.push([]);
 projects.forEach(function(p,i){columns[i%columnCount].push(p)});
-app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+projectCardFormat(p)+' size-'+sizes[index%sizes.length]+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+'<span class="tile-visual">'+img(p.image,p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'</span><span class="tile-caption"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></span></a>'}).join("")+'</div>'}).join("")+'</section>';
+app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+projectCardFormat(p)+' size-'+projectCardSize(p,index)+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+'<span class="tile-visual">'+img(p.image,p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'</span><span class="tile-caption"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></span></a>'}).join("")+'</div>'}).join("")+'</section>';
 app.dataset.mosaicColumns=String(columnCount)
 }
 function oneProject(p){
