@@ -30,21 +30,38 @@
     else { li.next().after(li); }
     syncGallery();
   });
+  function applyCrop(control) {
+    var x = control.find('[name="yard_home_crop_x"]').val();
+    var y = control.find('[name="yard_home_crop_y"]').val();
+    control.find('.yard-media-preview img').css('object-position', x + '% ' + y + '%');
+  }
+  var home = $('.yard-media-control[data-field="home_image"]');
+  home.on('input change', 'input[type="range"]', function () { applyCrop(home); });
+  home.on('click', '.yard-center-crop', function () {
+    home.find('input[type="range"]').val(50);
+    applyCrop(home);
+  });
+  applyCrop(home);
   $('.yard-pick-image').on('click', function () {
     var control = $(this).closest('.yard-media-control');
     var frame = wp.media({title: control.find('h3').text(), button: {text: 'Выбрать'}, library: {type: 'image'}, multiple: false});
     frame.on('select', function () {
       var item = frame.state().get('selection').first().toJSON();
-      if (control.data('field') === 'home_image' && !(item.width > item.height * 1.2)) {
-        window.alert('Для главной выберите горизонтальную фотографию: ширина должна быть минимум на 20% больше высоты.');
-        return;
+      var isHome = control.data('field') === 'home_image';
+      var selection = control.find('input[type="hidden"]');
+      if (isHome && Number(selection.val()) !== item.id) { control.find('input[type="range"]').val(50); }
+      selection.val(item.id);
+      var size = item.sizes && item.sizes[isHome ? 'yard_large' : 'thumbnail'];
+      control.find('.yard-media-preview').empty().append($('<img>').attr({src: size ? size.url : item.url, alt: ''}));
+      if (isHome) {
+        control.find('.yard-crop-controls').prop('hidden', false);
+        applyCrop(control);
       }
-      control.find('input').val(item.id);
-      control.find('.yard-media-preview').empty().append($('<img>').attr({src: item.sizes && item.sizes.thumbnail ? item.sizes.thumbnail.url : item.url, alt: ''}));
     });
     frame.open();
   });
   $('.yard-clear-image').on('click', function () {
-    var control = $(this).closest('.yard-media-control'); control.find('input').val('0'); control.find('.yard-media-preview').empty();
+    var control = $(this).closest('.yard-media-control'); control.find('input[type="hidden"]').val('0'); control.find('.yard-media-preview').empty();
+    control.find('.yard-crop-controls').prop('hidden', true);
   });
 })(jQuery);
