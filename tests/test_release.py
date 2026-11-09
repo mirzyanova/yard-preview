@@ -148,7 +148,7 @@ class DeploymentBoundaryTests(unittest.TestCase):
         self.assertIn('function bindPortfolioScrollRise()',source)
         self.assertIn('new IntersectionObserver(function(entries)',source)
         self.assertIn('entry.target.classList.add("is-revealed")',source)
-        self.assertIn('portfolioRevealObserver.unobserve(entry.target)',source)
+        self.assertIn('observer.unobserve(entry.target)',source)
         self.assertIn('portfolioRevealObserver.disconnect()',source)
         self.assertIn('rootMargin:"0px 0px -7% 0px"',source)
         self.assertIn('bindPortfolioScrollRise();',source)
