@@ -760,15 +760,16 @@ app.classList.remove("portfolio-rise-ready");
 return
 }
 app.classList.add("portfolio-rise-ready");
-portfolioRevealObserver=new IntersectionObserver(function(entries){
+var observer=new IntersectionObserver(function(entries){
 entries.forEach(function(entry){
 if(entry.isIntersecting){
 entry.target.classList.add("is-revealed");
-portfolioRevealObserver.unobserve(entry.target)
+observer.unobserve(entry.target)
 }
 })
 },{threshold:0.12,rootMargin:"0px 0px -7% 0px"});
-tiles.forEach(function(tile){portfolioRevealObserver.observe(tile)})
+portfolioRevealObserver=observer;
+tiles.forEach(function(tile){observer.observe(tile)})
 }
 function allProjects(view){
 projectView=view||projectView;
