@@ -1,11 +1,22 @@
 (function ($) {
   'use strict';
   function syncGallery() {
+    var choices = {};
     $('#yard-gallery-ids').val($('#yard-gallery > li').map(function () { return this.dataset.id; }).get().join(','));
+    $('#yard-gallery > li').each(function () {
+      var value = $(this).find('.yard-gallery-size').val();
+      choices[this.dataset.id] = ['large', 'medium', 'small'].includes(value) ? value : 'large';
+    });
+    $('#yard-gallery-sizes').val(JSON.stringify(choices));
   }
   function galleryItem(media) {
     var li = $('<li>').attr('data-id', media.id);
     $('<img>').attr({src: (media.sizes && media.sizes.thumbnail ? media.sizes.thumbnail.url : media.url), alt: ''}).appendTo(li);
+    var sizing = $('<label class="yard-gallery-size-label">').text('Размер на странице').appendTo(li);
+    var select = $('<select class="yard-gallery-size">').appendTo(sizing);
+    [['large', 'Большой — по осям'], ['medium', 'Средний — схема'], ['small', 'Малый — узел']].forEach(function (option) {
+      $('<option>').attr('value', option[0]).text(option[1]).appendTo(select);
+    });
     var buttons = $('<div>').appendTo(li);
     [['yard-up', '↑', 'Раньше'], ['yard-down', '↓', 'Позже'], ['yard-remove', 'Убрать', 'Убрать из галереи']].forEach(function (b) {
       $('<button type="button" class="button">').addClass(b[0]).text(b[1]).attr('aria-label', b[2]).appendTo(buttons);
@@ -23,6 +34,7 @@
     });
     frame.open();
   });
+  $('#yard-gallery').on('change', '.yard-gallery-size', syncGallery);
   $('#yard-gallery').on('click', '.yard-remove, .yard-up, .yard-down', function () {
     var li = $(this).closest('li');
     if ($(this).hasClass('yard-remove')) { li.remove(); }
@@ -64,15 +76,16 @@
     frame.on('select',function(){
       var item=frame.state().get('selection').first().toJSON();
       var isHome=control.data('field')==='home_image';
+      var isPage=control.data('field')==='page_image';
       if(Number(control.find('input[type="hidden"]').val())!==Number(item.id)){
         control.find('.yard-crop-controls input[type="range"]').val(50);
       }
       control.find('input[type="hidden"]').val(item.id);
-      var sizes=item.sizes||{}, size=isHome?(sizes.yard_large||sizes.large||sizes.full):(sizes.yard_card||sizes.large||sizes.full);
+      var sizes=item.sizes||{}, size=(isHome||isPage)?(sizes.yard_large||sizes.large||sizes.full):(sizes.yard_card||sizes.large||sizes.full);
       control.find('.yard-media-preview').empty().append($('<img>').attr({src:size?size.url:item.url,alt:'Предпросмотр кадрирования'}));
       control.find('.yard-crop-controls').prop('hidden',false);
       applyCrop(control);
-      if(isHome)control.attr('data-format','horizontal');else syncCardPreview();
+      if(isHome)control.attr('data-format','horizontal');else if(!isPage)syncCardPreview();
     });
     frame.open();
   });

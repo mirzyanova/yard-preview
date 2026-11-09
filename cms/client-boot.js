@@ -37,6 +37,10 @@ var projects = yardPayload.projects.map(function (p, i) {
     id:p.id, name:yardEscape(p.name), year:yardEscape(p.year), stage:yardEscape(p.stage), location:yardEscape(p.location),
     intro:yardEscape(p.intro).replace(/\r?\n/g,'<br>'),
     description:yardEscape(p.description).replace(/\r?\n/g,'<br>'), image:yardMediaUrl(p.image), gallery:p.gallery.map(yardMediaUrl),
+    pageImage:p.pageImage ? yardMediaUrl(p.pageImage) : null,
+    galleryItems:Array.isArray(p.galleryItems)&&p.galleryItems.length?p.galleryItems.map(function(item){
+      return {url:yardMediaUrl(item.url),size:['large','medium','small'].includes(item.size)?item.size:'large'};
+    }):p.gallery.map(function(url){return {url:yardMediaUrl(url),size:'large'}}),
     cardFormat:['horizontal','vertical','square'].includes(p.cardFormat) ? p.cardFormat : 'square',
     cardSize:['small','medium','large'].includes(p.cardSize) ? p.cardSize : 'auto',
     homeImage:p.homeImage ? yardMediaUrl(p.homeImage) : null, showOnHome:p.showOnHome === true,

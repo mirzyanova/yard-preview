@@ -406,6 +406,61 @@
 .detail .detail-intro{font-family:"Sitka Text",Cambria,Georgia,serif;font-size:clamp(26px,2.5vw,38px);line-height:1.34;letter-spacing:-.015em;font-weight:400;margin:0}
 .detail .detail-body{font-family:"Century Gothic","CenturyGothic",Arial,sans-serif;font-size:clamp(14px,1.12vw,17px);line-height:1.85;letter-spacing:0;color:#333;margin:0;max-width:750px}
 @media(max-width:600px){.detail-copy{gap:23px}.detail .detail-intro{font-size:clamp(23px,6.4vw,30px)}.detail .detail-body{font-size:15px;line-height:1.75}}
+
+/* Portfolio publication — natural-aspect photographs, restrained type and shared page axes. */
+.project-page{width:100%;overflow:hidden}
+.project-page .project-heading{padding:clamp(60px,6.5vw,100px) var(--page) clamp(36px,4.5vw,65px);max-width:1520px}
+.project-page .project-heading h1{font-size:clamp(36px,4.15vw,65px);line-height:1.07;letter-spacing:-.045em;max-width:1150px;margin:clamp(32px,4.2vw,62px) 0 0}
+.project-lead{margin:0 var(--page);max-width:none;min-height:0;display:flex;justify-content:center;align-items:center;background:#fff}
+.project-lead img{width:auto;height:auto;max-width:100%;max-height:90svh;object-fit:contain;display:block}
+.project-info{margin:0 auto;max-width:1520px;padding:clamp(44px,5.5vw,80px) var(--page) clamp(42px,5.5vw,80px)}
+.project-info dl{margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,4vw,70px);border-bottom:1px solid #dedede;padding-bottom:clamp(35px,4vw,56px)}
+.project-fact{min-width:0}
+.project-fact dt{font-size:12px;line-height:1.5;color:#858585;margin:0 0 13px}
+.project-fact dd{font-size:clamp(14px,1.12vw,17px);line-height:1.55;margin:0;overflow-wrap:break-word}
+.project-page .detail{padding:clamp(30px,5vw,75px) var(--page) clamp(70px,8vw,128px);grid-template-columns:minmax(180px,.7fr) minmax(0,1.3fr);gap:clamp(40px,6vw,105px)}
+.project-page .detail-intro{font-size:clamp(23px,2.3vw,36px)}
+.project-page .detail-body{font-size:clamp(14px,1.08vw,17px);line-height:1.85;letter-spacing:0}
+.project-images{margin:0 var(--page) clamp(85px,12vw,165px);display:flex;flex-direction:column;gap:clamp(50px,6.5vw,110px);max-width:none}
+.project-frame{margin:0;display:flex;align-items:center;justify-content:center;width:100%;min-width:0;background:#fff}
+.project-frame.size-large{width:100%}
+.project-frame.size-medium{width:76%;margin-left:auto;margin-right:auto}
+.project-frame.size-small{width:45%;margin-left:auto;margin-right:auto}
+.project-frame img{display:block;width:auto;height:auto;max-width:100%;max-height:100svh;object-fit:contain}
+.project-frame.size-small:nth-child(4n+2){margin-left:0;margin-right:auto}
+.project-frame.size-small:nth-child(4n+4){margin-right:0;margin-left:auto}
+.project-page .next-project{display:flex;align-items:center;justify-content:flex-end;gap:clamp(20px,3vw,48px);padding:clamp(38px,5.5vw,82px) var(--page)}
+.project-page .next-project>div{text-align:right;max-width:min(100%,560px)}
+.project-page .next-project small{font-size:11px;margin:0 0 13px;letter-spacing:.04em}
+.project-page .next-project strong{display:block;font-size:clamp(18px,1.75vw,25px);font-weight:400;line-height:1.3;letter-spacing:-.02em}
+.project-page .next-project .next-arrow svg{width:29px;height:29px}
+@media(max-width:900px){
+ .project-page .project-heading h1{font-size:clamp(34px,5.4vw,55px)}
+ .project-page .detail{grid-template-columns:1fr;gap:30px}
+ .project-info dl{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .project-frame.size-medium{width:84%}
+ .project-frame.size-small{width:60%}
+}
+@media(max-width:600px){
+ .project-page .project-heading{padding:60px var(--page) 35px}
+ .project-page .project-heading h1{font-size:clamp(30px,8vw,42px);letter-spacing:-.035em;margin:32px 0 0;line-height:1.12}
+ .project-lead{margin:0 var(--page)}
+ .project-lead img{max-height:75svh}
+ .project-info{padding:40px var(--page) 42px}
+ .project-info dl{grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 16px;padding-bottom:33px}
+ .project-fact dt{margin-bottom:8px}
+ .project-fact dd{font-size:14px}
+ .project-page .detail{padding:28px var(--page) 65px;gap:23px}
+ .project-page .detail-intro{font-size:25px}
+ .project-page .detail-body{font-size:15px;line-height:1.7}
+ .project-images{margin:0 var(--page) 85px;gap:48px}
+ .project-frame.size-medium{width:89%}
+ .project-frame.size-small{width:69%}
+ .project-frame img{max-height:80svh}
+ .project-page .next-project{padding:38px var(--page) 56px;gap:19px}
+ .project-page .next-project strong{font-size:17px}
+ .project-page .next-project .next-arrow svg{width:23px;height:23px}
+}
 </style>
 </head>
 <body>
@@ -535,10 +590,32 @@ projects.forEach(function(p,i){columns[i%columnCount].push(p)});
 app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+projectCardFormat(p)+' size-'+projectCardSize(p,index)+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+'<span class="tile-visual">'+cardImage(p)+'</span><span class="tile-caption"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></span></a>'}).join("")+'</div>'}).join("")+'</section>';
 app.dataset.mosaicColumns=String(columnCount)
 }
+
+function projectInfo(p){
+var fields=[['Локация',p.location],['Год',p.year],['Стадия',p.stage]];
+var rows=fields.filter(function(item){return item[1]&&item[1]!=='—'&&item[1]!=='-'}).map(function(item){return '<div class="project-fact"><dt>'+item[0]+'</dt><dd>'+item[1]+'</dd></div>'}).join('');
+return rows?'<section class="project-info" aria-label="Информация о проекте"><dl>'+rows+'</dl></section>':''
+}
+function projectLead(p){
+var image=p.pageImage||p.gallery[0]||p.image;
+return image?'<figure class="project-lead"><img src="'+image+'" alt="'+p.name+'" fetchpriority="high" decoding="async"></figure>':''
+}
+function projectImages(p){
+var primary=p.pageImage||p.gallery[0]||p.image;
+var items=(p.galleryItems&&p.galleryItems.length?p.galleryItems:p.gallery.map(function(url){return {url:url,size:'large'}}));
+var seenLead=false;
+var other=items.filter(function(item){if(!seenLead&&item.url===primary){seenLead=true;return false}return true});
+if(!other.length)return '';
+return '<section class="project-images" aria-label="Изображения проекта">'+other.map(function(item,i){
+var size=['large','medium','small'].includes(item.size)?item.size:'large';
+return '<figure class="project-frame size-'+size+'"><img src="'+item.url+'" alt="'+p.name+' — изображение '+(i+2)+'" loading="lazy" decoding="async"></figure>'
+}).join('')+'</section>'
+}
 function oneProject(p){
-var next=projects[(p.id+1)%projects.length];
-app.innerHTML='<article><header class="project-heading"><a class="back" href="#/projects">'+iconSvg("back","inline-arrow")+' Все проекты</a><h1>'+p.name+'</h1><div class="meta">'+p.stage+' · '+p.year+'</div></header><section class="gallery'+(p.id===1?' gallery-portrait':'')+'" aria-label="Галерея изображений"><img class="gallery-photo" src="'+p.gallery[0]+'" alt="'+(p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'">'+controls()+'<div class="gallery-count">01 / '+String(p.gallery.length).padStart(2,"0")+'</div></section>'+projectDetail(p)+'<a class="next-project" href="#/projects/'+next.id+'"><div><small>СЛЕДУЮЩИЙ ПРОЕКТ</small><strong>'+next.name+'</strong></div><span class="next-arrow">'+iconSvg("up-right")+'</span></a></article>';
-bindSlideshow(app.querySelector(".gallery"),p.gallery,false)
+var next=projects[(projects.indexOf(p)+1)%projects.length];
+app.innerHTML='<article class="project-page"><header class="project-heading"><a class="back" href="#/projects">'+iconSvg("back","inline-arrow")+' Все проекты</a><h1>'+p.name+'</h1></header>'+
+projectLead(p)+projectInfo(p)+projectDetail(p)+projectImages(p)+
+'<a class="next-project" href="#/projects/'+next.id+'"><div><small>СЛЕДУЮЩИЙ ПРОЕКТ</small><strong>'+next.name+'</strong></div><span class="next-arrow">'+iconSvg("up-right")+'</span></a></article>'
 }
 function privacy(){app.innerHTML='<section class="privacy"><h1>Cookie и конфиденциальность</h1><p>Это тестовая версия сайта ЯРД. Здесь нет рекламных или аналитических cookie. Уведомление появляется при каждом новом открытии сайта и не сохраняет отметку о закрытии. Форма обратной связи в тестовой версии только подготавливает письмо в вашем почтовом приложении: введённые данные не сохраняются и не отправляются на сервер этого сайта. При запуске полноценного сайта добавим информацию об обработке обращений и реквизиты оператора персональных данных.</p><p><a class="text-link" href="#/">'+iconSvg("back","inline-arrow")+' На главную</a></p></section>'}
 function bindContactForm(){

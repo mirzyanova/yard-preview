@@ -29,13 +29,11 @@ def build(output, release_id, fixture=None):
     end = html.index('function projectCardFormat(p)')
     html = html[:start] + (ROOT / 'cms/client-boot.js').read_text() + '\n' + html[end:]
     html = once(html, '}).slice(0,4)}', '})}')
-    html = once(html, 'var next=projects[(p.id+1)%projects.length];', 'var next=projects[(projects.indexOf(p)+1)%projects.length];')
     html = once(html, 'var p=projects[Number(r.split("/")[2])];', 'var p=projects.find(function(item){return item.id===Number(r.split("/")[2])});')
     html = once(html, 'var index=p.id, position=', 'var index=p.displayIndex, position=')
     html = html.replace("p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД'", 'p.name')
     html = once(html, 'img(heroImage(p),p.name)', 'yardHeroImage(p)')
     html = html.replace("p.stage+' · '+p.year", 'yardProjectMeta(p)')
-    html = once(html, "p.id===1?' gallery-portrait':''", "p.cardFormat==='vertical'?' gallery-portrait':''")
     # Project description markup is shared with the original site; CMS supplies intro and body.
     start = html.index('function privacy(){')
     end = html.index('function contacts(){', start)
