@@ -1,0 +1,9 @@
+DirectoryIndex index.php
+Options -Indexes
+<FilesMatch "^(wp-config(?:-sample)?\.php|xmlrpc\.php|setup-config\.php|install\.php|readme\.html|license\.txt)$">
+  Require all denied
+</FilesMatch>
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>

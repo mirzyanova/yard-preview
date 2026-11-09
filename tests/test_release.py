@@ -26,6 +26,6 @@ class DeploymentBoundaryTests(unittest.TestCase):
     def test_real_projects_only_and_missing_data_remains_empty(self):
         projects=json.loads((ROOT/'cms/yard-projects/seed.json').read_text())['projects']
         self.assertEqual([len(p['photos']) for p in projects],[3,8])
-        self.assertEqual(projects[0]['stage'],'')
+        self.assertEqual(projects[0]['stage'],'Реализация')
         self.assertFalse(projects[1]['showOnHome'])
 if __name__=='__main__':unittest.main()

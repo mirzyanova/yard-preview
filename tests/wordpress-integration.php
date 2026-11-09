@@ -35,7 +35,7 @@ if (count($projects) !== 2) {
 yard_assert(count($projects) === 2, 'Only the two real projects are imported');
 yard_assert(array_column($projects, 'id') === [0,1], 'Existing project URLs retain their IDs');
 yard_assert(count($projects[0]['gallery']) === 3 && count($projects[1]['gallery']) === 8, 'All 11 original photographs are in the media library');
-yard_assert($projects[0]['stage'] === '' && $projects[0]['description'] === '', 'Missing ERFURT data is not invented');
+yard_assert($projects[0]['stage'] === 'Реализация' && $projects[0]['description'] === '', 'ERFURT preserves the source stage and leaves its missing description empty');
 yard_assert($projects[0]['showOnHome'] && !$projects[1]['showOnHome'], 'Only a suitable horizontal hero is featured');
 $again = yard_import_projects(dirname(__DIR__));
 yard_assert(count(yard_public_projects()) === 2 && count(get_posts(['post_type'=>'attachment','posts_per_page'=>-1])) === 11, 'Import is idempotent');
