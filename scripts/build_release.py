@@ -30,7 +30,7 @@ def build(output, release_id, fixture=None):
     html = html[:start] + (ROOT / 'cms/client-boot.js').read_text() + '\n' + html[end:]
     html = once(html, '}).slice(0,4)}', '})}')
     html = once(html, 'var p=projects[Number(r.split("/")[2])];', 'var p=projects.find(function(item){return item.id===Number(r.split("/")[2])});')
-    # The portfolio uses the same ordered two-column card grid on GitHub and Timeweb.
+    # The portfolio uses the same three-column masonry and CMS card priorities on GitHub and Timeweb.
     html = html.replace("p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД'", 'p.name')
     html = once(html, 'img(heroImage(p),p.name)', 'yardHeroImage(p)')
     html = html.replace("p.stage+' · '+p.year", 'yardProjectMeta(p)')
