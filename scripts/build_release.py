@@ -36,9 +36,7 @@ def build(output, release_id, fixture=None):
     html = once(html, 'img(heroImage(p),p.name)', 'yardHeroImage(p)')
     html = html.replace("p.stage+' · '+p.year", 'yardProjectMeta(p)')
     html = once(html, "p.id===1?' gallery-portrait':''", "p.cardFormat==='vertical'?' gallery-portrait':''")
-    description_start = html.index("+(p.id<=1?'':'<section class=\"detail\"")
-    description_end = html.index("+'<a class=\"next-project\"", description_start)
-    html = html[:description_start] + "+(p.description?'<section class=\"detail\"><div class=\"detail-label\">О ПРОЕКТЕ</div><p>'+p.description+'</p></section>':'')" + html[description_end:]
+    # Project description markup is shared with the original site; CMS supplies intro and body.
     start = html.index('function privacy(){')
     end = html.index('function contacts(){', start)
     html = html[:start] + (ROOT / 'cms/client-contact.js').read_text() + '\n' + html[end:]
