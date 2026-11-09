@@ -33,6 +33,7 @@ def build(output, release_id, fixture=None):
     html = once(html, 'var p=projects[Number(r.split("/")[2])];', 'var p=projects.find(function(item){return item.id===Number(r.split("/")[2])});')
     html = once(html, 'var index=p.id, position=', 'var index=p.displayIndex, position=')
     html = html.replace("p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД'", 'p.name')
+    html = once(html, 'img(heroImage(p),p.name)', 'yardHeroImage(p)')
     html = html.replace("p.stage+' · '+p.year", 'yardProjectMeta(p)')
     html = once(html, "p.id===1?' gallery-portrait':''", "p.cardFormat==='vertical'?' gallery-portrait':''")
     description_start = html.index("+(p.id<=1?'':'<section class=\"detail\"")
