@@ -172,6 +172,34 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertNotIn('<h2 class="project-story-label">ПРОЕКТ</h2>',compiled)
             self.assertTrue(deploy.validate_release(output))
 
+    def test_home_sections_reveal_in_order_only_when_scrolled_into_view(self):
+        source=(ROOT/'index.html').read_text()
+        closing='class="closing home-scroll-rise"'
+        facts='class="yard-facts home-scroll-rise"'
+        self.assertEqual(source.count(closing),1)
+        self.assertEqual(source.count(facts),1)
+        self.assertLess(source.index(closing),source.index(facts))
+        self.assertIn('function bindHomeScrollRise()',source)
+        self.assertIn('new IntersectionObserver(function(entries)',source)
+        self.assertIn('entry.target.classList.add("is-visible")',source)
+        self.assertIn('observer.unobserve(entry.target)',source)
+        self.assertIn('observer.disconnect()',source)
+        self.assertIn('var previousCleanup=clearEvents;',source)
+        self.assertIn('rootMargin:"0px 0px -9% 0px"',source)
+        self.assertIn('@media(prefers-reduced-motion:no-preference)',source)
+        self.assertIn('@media(prefers-reduced-motion:reduce)',source)
+        self.assertIn('#app.home-rise-ready .home-scroll-rise:not(.is-visible)',source)
+        self.assertIn('opacity:0;transform:translate3d(0,clamp(58px,7vw,112px),0) scale(.982)',source)
+        self.assertIn('bindHomeScrollRise()\n}',source)
+        with tempfile.TemporaryDirectory() as temp:
+            release=Path(temp)/'release'
+            build.build(release,'b'*40)
+            html=(release/'index.html').read_text()
+            self.assertLess(html.index(closing),html.index(facts))
+            self.assertIn('function bindHomeScrollRise()',html)
+            self.assertIn('#app.home-rise-ready .home-scroll-rise:not(.is-visible)',html)
+            self.assertTrue(deploy.validate_release(release))
+
     def test_real_projects_only_and_missing_data_remains_empty(self):
         projects=json.loads((ROOT/'cms/yard-projects/seed.json').read_text())['projects']
         self.assertEqual([len(p['photos']) for p in projects],[3,8])
