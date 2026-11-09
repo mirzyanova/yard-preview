@@ -1,1 +1,11 @@
 .yard-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px}.yard-fields label{display:flex;flex-direction:column;gap:8px}.yard-fields input,.yard-fields select{width:100%}.yard-media-control{margin:20px 0}.yard-media-preview img{display:block;width:130px;height:130px;object-fit:contain;background:#f5f5f5;margin-bottom:12px}#yard-gallery{display:flex;flex-wrap:wrap;gap:15px}#yard-gallery li{width:160px;padding:10px;border:1px solid #ccc;background:white;cursor:move}#yard-gallery img{display:block;width:160px;height:140px;object-fit:contain;margin-bottom:10px}#yard-gallery li div{display:flex;gap:4px;justify-content:center}
+
+.yard-media-control[data-field="home_image"] .yard-media-preview img {
+  width: min(100%, 560px);
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.yard-crop-controls { margin-top: 12px; }
+.yard-crop-controls label { display: block; margin-bottom: 8px; }
+.yard-crop-controls input { vertical-align: middle; }
