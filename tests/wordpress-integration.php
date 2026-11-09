@@ -37,6 +37,19 @@ yard_assert(array_column($projects, 'id') === [0,1], 'Existing project URLs reta
 yard_assert(count($projects[0]['gallery']) === 3 && count($projects[1]['gallery']) === 8, 'All 11 original photographs are in the media library');
 yard_assert($projects[0]['stage'] === 'Реализация' && $projects[0]['description'] === '', 'ERFURT preserves the source stage and leaves its missing description empty');
 yard_assert($projects[0]['showOnHome'] && !$projects[1]['showOnHome'], 'Only a suitable horizontal hero is featured');
+yard_assert($projects[0]['cardSize'] === 'auto' && $projects[1]['cardSize'] === 'auto', 'Existing projects default to automatic card sizing');
+update_post_meta($projects[0]['postId'], '_yard_card_size', 'large');
+yard_assert(yard_public_projects()[0]['cardSize'] === 'large', 'Explicit large card priority reaches public API');
+update_post_meta($projects[0]['postId'], '_yard_card_size', 'small');
+yard_assert(yard_public_projects()[0]['cardSize'] === 'small', 'Small card priority reaches public API');
+update_post_meta($projects[0]['postId'], '_yard_card_size', 'invalid');
+yard_assert(yard_public_projects()[0]['cardSize'] === 'auto', 'Unrecognized card size falls back safely');
+update_post_meta($projects[0]['postId'], '_yard_card_size', 'auto');
+ob_start();
+yard_project_box(get_post($projects[0]['postId']));
+$yard_editor_markup = ob_get_clean();
+yard_assert(str_contains($yard_editor_markup, 'name="yard_card_size"') && str_contains($yard_editor_markup, 'Большая') && str_contains($yard_editor_markup, 'Автоматически'), 'Admin panel displays card size selector');
+
 $again = yard_import_projects(dirname(__DIR__));
 yard_assert(count(yard_public_projects()) === 2 && count(get_posts(['post_type'=>'attachment','posts_per_page'=>-1])) === 11, 'Import is idempotent');
 $forum_id = $projects[1]['postId'];
