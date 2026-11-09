@@ -407,61 +407,23 @@
 .detail .detail-body{font-family:"Century Gothic","CenturyGothic",Arial,sans-serif;font-size:clamp(14px,1.12vw,17px);line-height:1.85;letter-spacing:0;color:#333;margin:0;max-width:750px}
 @media(max-width:600px){.detail-copy{gap:23px}.detail .detail-intro{font-size:clamp(23px,6.4vw,30px)}.detail .detail-body{font-size:15px;line-height:1.75}}
 
-/* Portfolio publication — natural-aspect photographs, restrained type and shared page axes. */
+/* A compact editorial project heading and understated right-aligned next-project link. */
 .project-page{width:100%;overflow:hidden}
 .project-page .project-heading{padding:clamp(60px,6.5vw,100px) var(--page) clamp(36px,4.5vw,65px);max-width:1520px}
 .project-page .project-heading h1{font-size:clamp(36px,4.15vw,65px);line-height:1.07;letter-spacing:-.045em;max-width:1150px;margin:clamp(32px,4.2vw,62px) 0 0}
-.project-lead{margin:0 var(--page);max-width:none;min-height:0;display:flex;justify-content:center;align-items:center;background:#fff}
-.project-lead img{width:auto;height:auto;max-width:100%;max-height:90svh;object-fit:contain;display:block}
-.project-info{margin:0 auto;max-width:1520px;padding:clamp(44px,5.5vw,80px) var(--page) clamp(42px,5.5vw,80px)}
-.project-info dl{margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,4vw,70px);border-bottom:1px solid #dedede;padding-bottom:clamp(35px,4vw,56px)}
-.project-fact{min-width:0}
-.project-fact dt{font-size:12px;line-height:1.5;color:#858585;margin:0 0 13px}
-.project-fact dd{font-size:clamp(14px,1.12vw,17px);line-height:1.55;margin:0;overflow-wrap:break-word}
-.project-page .detail{padding:clamp(30px,5vw,75px) var(--page) clamp(70px,8vw,128px);grid-template-columns:minmax(180px,.7fr) minmax(0,1.3fr);gap:clamp(40px,6vw,105px)}
-.project-page .detail-intro{font-size:clamp(23px,2.3vw,36px)}
-.project-page .detail-body{font-size:clamp(14px,1.08vw,17px);line-height:1.85;letter-spacing:0}
-.project-images{margin:0 var(--page) clamp(85px,12vw,165px);display:flex;flex-direction:column;gap:clamp(50px,6.5vw,110px);max-width:none}
-.project-frame{margin:0;display:flex;align-items:center;justify-content:center;width:100%;min-width:0;background:#fff}
-.project-frame.size-large{width:100%}
-.project-frame.size-medium{width:76%;margin-left:auto;margin-right:auto}
-.project-frame.size-small{width:45%;margin-left:auto;margin-right:auto}
-.project-frame img{display:block;width:auto;height:auto;max-width:100%;max-height:100svh;object-fit:contain}
-.project-frame.size-small:nth-child(4n+2){margin-left:0;margin-right:auto}
-.project-frame.size-small:nth-child(4n+4){margin-right:0;margin-left:auto}
 .project-page .next-project{display:flex;align-items:center;justify-content:flex-end;gap:clamp(20px,3vw,48px);padding:clamp(38px,5.5vw,82px) var(--page)}
 .project-page .next-project>div{text-align:right;max-width:min(100%,560px)}
 .project-page .next-project small{font-size:11px;margin:0 0 13px;letter-spacing:.04em}
 .project-page .next-project strong{display:block;font-size:clamp(18px,1.75vw,25px);font-weight:400;line-height:1.3;letter-spacing:-.02em}
 .project-page .next-project .next-arrow svg{width:29px;height:29px}
-@media(max-width:900px){
- .project-page .project-heading h1{font-size:clamp(34px,5.4vw,55px)}
- .project-page .detail{grid-template-columns:1fr;gap:30px}
- .project-info dl{grid-template-columns:repeat(3,minmax(0,1fr))}
- .project-frame.size-medium{width:84%}
- .project-frame.size-small{width:60%}
-}
+@media(max-width:900px){.project-page .project-heading h1{font-size:clamp(34px,5.4vw,55px)}}
 @media(max-width:600px){
  .project-page .project-heading{padding:60px var(--page) 35px}
  .project-page .project-heading h1{font-size:clamp(30px,8vw,42px);letter-spacing:-.035em;margin:32px 0 0;line-height:1.12}
- .project-lead{margin:0 var(--page)}
- .project-lead img{max-height:75svh}
- .project-info{padding:40px var(--page) 42px}
- .project-info dl{grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 16px;padding-bottom:33px}
- .project-fact dt{margin-bottom:8px}
- .project-fact dd{font-size:14px}
- .project-page .detail{padding:28px var(--page) 65px;gap:23px}
- .project-page .detail-intro{font-size:25px}
- .project-page .detail-body{font-size:15px;line-height:1.7}
- .project-images{margin:0 var(--page) 85px;gap:48px}
- .project-frame.size-medium{width:89%}
- .project-frame.size-small{width:69%}
- .project-frame img{max-height:80svh}
  .project-page .next-project{padding:38px var(--page) 56px;gap:19px}
  .project-page .next-project strong{font-size:17px}
  .project-page .next-project .next-arrow svg{width:23px;height:23px}
 }
-
 /* Editorial gallery: one cohesive sequence with miniature navigation, no forced crop. */
 .project-page .project-gallery{margin:0 var(--page);width:auto;max-width:none}
 .project-gallery-stage{position:relative;height:min(76svh,800px);min-height:380px;display:flex;align-items:center;justify-content:center;background:#fff}
@@ -692,7 +654,12 @@ if(display.getAttribute('src')!==item.url){display.src=item.url}
 display.alt=p.name+' — изображение '+(current+1);
 count.textContent=String(current+1).padStart(2,'0')+' / '+String(items.length).padStart(2,'0');
 thumbs.forEach(function(btn,i){var active=i===current;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active))});
-var selected=thumbs[current];if(selected&&selected.scrollIntoView){selected.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})}
+var selected=thumbs[current],scroller=root.querySelector('.project-gallery-thumbs');
+if(selected&&scroller){
+var left=selected.offsetLeft-scroller.offsetLeft;
+if(left<scroller.scrollLeft){scroller.scrollLeft=left}
+else if(left+selected.offsetWidth>scroller.scrollLeft+scroller.clientWidth){scroller.scrollLeft=left+selected.offsetWidth-scroller.clientWidth}
+}
 }
 var prev=root.querySelector('.project-gallery-prev'),next=root.querySelector('.project-gallery-next');
 if(prev)prev.onclick=function(){show(current-1)};
@@ -701,7 +668,7 @@ root.addEventListener('click',function(event){
 var btn=event.target.closest('.project-gallery-thumb');
 if(btn&&root.contains(btn))show(Number(btn.dataset.index))
 });
-stage.addEventListener('keydown',function(event){
+root.addEventListener('keydown',function(event){
 if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();show(current+(event.key==='ArrowRight'?1:-1))}
 });
 var initialX=0,initialY=0;
