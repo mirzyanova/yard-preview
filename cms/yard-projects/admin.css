@@ -32,3 +32,13 @@
 .yard-home-order input{width:140px;margin-left:12px}
 .yard-home-order .description{max-width:780px}
 @media(max-width:700px){.yard-crop-controls{grid-template-columns:1fr}.yard-crop-controls p,.yard-crop-controls .yard-center-crop{grid-column:auto}}
+
+/* The main page image is shown without crop, even for portraits or small diagrams. */
+.yard-media-control[data-field="page_image"] .yard-media-preview{display:block;aspect-ratio:auto;width:min(100%,760px);max-width:100%;height:auto;overflow:visible;background:#fff;border:0}
+.yard-media-control[data-field="page_image"] .yard-media-preview img{position:static;display:block;width:auto;height:auto;max-width:100%;max-height:75vh;object-fit:contain;margin:0 auto;background:#fff}
+#yard-gallery li{width:190px;max-width:100%;box-sizing:border-box}
+#yard-gallery img{max-width:100%;width:100%;object-fit:contain}
+#yard-gallery .yard-gallery-size-label{display:flex;flex-direction:column;gap:5px;margin:10px 0;font-size:12px;line-height:1.4;color:#464646}
+#yard-gallery .yard-gallery-size{width:100%;max-width:100%;min-height:35px;font-size:12px}
+#yard-gallery li>div{display:flex;gap:4px;justify-content:space-between;flex-wrap:wrap}
+#yard-gallery li>div .button{font-size:12px}
