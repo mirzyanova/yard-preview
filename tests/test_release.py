@@ -84,6 +84,33 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn("intro:yardEscape(p.intro)",html)
             self.assertIn("data-crop-x=",html)
             self.assertIn('class="detail-body"',html)
+    def test_project_pages_preserve_photo_aspect_and_three_size_rails(self):
+        source=(ROOT/'index.html').read_text()
+        plugin=(ROOT/'cms/yard-projects/yard-projects.php').read_text()
+        boot=(ROOT/'cms/client-boot.js').read_text()
+        self.assertIn('function projectLead(p)',source)
+        self.assertIn('function projectImages(p)',source)
+        self.assertIn('function projectInfo(p)',source)
+        self.assertIn('class="project-frame size-',source)
+        self.assertIn('max-height:100svh;object-fit:contain',source)
+        self.assertIn('.project-frame.size-medium{width:76%',source)
+        self.assertIn('.project-frame.size-small{width:45%',source)
+        self.assertIn('.project-lead img{width:auto;height:auto;max-width:100%',source)
+        self.assertIn('font-size:clamp(36px,4.15vw,65px)',source)
+        self.assertIn('function yard_gallery_sizes(',plugin)
+        self.assertIn("'galleryItems' =>",plugin)
+        self.assertIn("'pageImage' =>",plugin)
+        self.assertIn('galleryItems:Array.isArray(p.galleryItems)',boot)
+        self.assertIn('pageImage:p.pageImage',boot)
+        with tempfile.TemporaryDirectory() as temp:
+            release=Path(temp)/'release'
+            build.build(release,'e'*40)
+            site=(release/'index.html').read_text()
+            self.assertIn('function projectLead(p)',site)
+            self.assertIn('function projectImages(p)',site)
+            self.assertIn('galleryItems:Array.isArray(p.galleryItems)',site)
+            self.assertNotIn('bindSlideshow(app.querySelector(".gallery")',site)
+            self.assertTrue(deploy.validate_release(release))
     def test_real_projects_only_and_missing_data_remains_empty(self):
         projects=json.loads((ROOT/'cms/yard-projects/seed.json').read_text())['projects']
         self.assertEqual([len(p['photos']) for p in projects],[3,8])
