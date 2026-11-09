@@ -35,6 +35,7 @@ function yard_write_pointer(string $root, string $name, string $release): void {
 }
 function yard_unpack_release(string $archive, string $release, string $root): void {
     if (!class_exists('ZipArchive') || !yard_release_id($release) || strlen($archive) > 30 * 1024 * 1024) { throw new RuntimeException('Unsupported release archive.'); }
+    require_once ABSPATH . 'wp-admin/includes/file.php';
     $temp = wp_tempnam('yard-release.zip');
     if (!$temp || file_put_contents($temp, $archive) !== strlen($archive)) { throw new RuntimeException('Could not stage release archive.'); }
     $zip = new ZipArchive();
