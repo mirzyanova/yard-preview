@@ -599,20 +599,28 @@ projectView=view||projectView;
 if(projectView==='list'){renderProjectList();return}
 
 /* A curated size rhythm is the default; the CMS may override per project. */
-var sizes=["large","medium","large","medium","large","medium","small","large"];
+var sizes=["large","medium","medium","small","medium","large","medium","medium"];
 function projectCardSize(p,index){return ["small","medium","large"].includes(p.cardSize)?p.cardSize:sizes[index%sizes.length]}
-var columnCount=mosaicColumnCount();
-var columns=[];for(var c=0;c<columnCount;c++)columns.push([]);
-projects.forEach(function(p,i){columns[i%columnCount].push(p)});
-app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+projectCardFormat(p)+' size-'+projectCardSize(p,index)+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+'<span class="tile-visual">'+cardImage(p)+'</span><span class="tile-caption"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></span></a>'}).join("")+'</div>'}).join("")+'</section>';
-app.dataset.mosaicColumns=String(columnCount)
+
+/* A two-column editorial rhythm with full-width feature projects.
+   Each WordPress cardSize override stays authoritative. */
+var slot=0;
+var cards=projects.map(function(p,i){
+var size=projectCardSize(p,i),format=projectCardFormat(p),lane=size==="large"?"wide":(slot===0?"left":"right");
+slot=size==="large"?0:1-slot;
+var meta=[p.stage,p.year].filter(Boolean).join(' · ');
+return '<a class="tile format-'+format+' size-'+size+' align-'+lane+'" href="#/projects/'+p.id+'" aria-label="'+p.name+(meta?", "+meta:"")+'">'+
+'<span class="tile-visual">'+cardImage(p)+'</span><span class="tile-caption"><strong>'+p.name+'</strong>'+(meta?'<small>'+meta+'</small>':'')+'</span></a>'
+}).join("");
+app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic yard-index" aria-label="Все проекты">'+cards+'</section>';
+app.dataset.mosaicColumns="2";
 }
 
 
 function projectInfo(p){
 var fields=[['Локация',p.location],['Год',p.year],['Стадия',p.stage]];
 var rows=fields.filter(function(item){return item[1]&&item[1]!=='—'&&item[1]!=='-'}).map(function(item){return '<div class="project-fact"><dt>'+item[0]+'</dt><dd>'+item[1]+'</dd></div>'}).join('');
-return rows?'<div class="project-story-facts"><h2 class="project-story-label">ПРОЕКТ</h2><dl>'+rows+'</dl></div>':''
+return rows?'<div class="project-story-facts"><dl>'+rows+'</dl></div>':''
 }
 function projectStory(p){
 var facts=projectInfo(p),description=projectDetail(p);
@@ -634,9 +642,9 @@ var items=projectGalleryItems(p),count=items.length;
 if(!count)return '';
 var first=items[0],alt=p.name;
 return '<section class="project-gallery" aria-label="Фотографии проекта"><div class="project-gallery-stage" tabindex="0" aria-label="Галерея: листайте стрелками">'+
-'<div class="project-gallery-canvas size-'+first.size+'"><img class="project-gallery-image" src="'+first.url+'" alt="'+alt+' — изображение 1" fetchpriority="high" decoding="async"></div>'+
+'<div class="project-gallery-canvas size-'+first.size+'"><div class="project-gallery-photo"><img class="project-gallery-image" src="'+first.url+'" alt="'+alt+' — изображение 1" fetchpriority="high" decoding="async">'+
 (count>1?'<button type="button" class="project-gallery-arrow project-gallery-prev" aria-label="Предыдущее фото">'+iconSvg("prev")+'</button><button type="button" class="project-gallery-arrow project-gallery-next" aria-label="Следующее фото">'+iconSvg("next")+'</button>':'')+
-'</div><div class="project-gallery-navigation">'+
+'</div></div></div><div class="project-gallery-navigation">'+
 '<div class="project-gallery-thumbs" role="group" aria-label="Выбрать фотографию">'+items.map(function(item,i){
 return '<button class="project-gallery-thumb'+(i===0?' active':'')+'" type="button" data-index="'+i+'" aria-label="Фото '+(i+1)+' из '+count+'" aria-pressed="'+(i===0?'true':'false')+'"><img src="'+item.url+'" alt="" loading="lazy" decoding="async"></button>'
 }).join('')+'</div><span class="project-gallery-count" aria-live="polite">01 / '+String(count).padStart(2,'0')+'</span></div></section>'
