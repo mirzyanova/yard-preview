@@ -12,17 +12,29 @@ if test -e "$yard_cms/wp-config.php"; then
   echo 'Configuration already exists. Stop and inspect before retrying.'
   exit 1
 fi
-read -r -s -p '1/3 Database password (hidden), then Enter: ' YARD_DATABASE_PASSWORD
-printf '\n'
-read -r -s -p '2/3 Choose NEW CMS password for yard-owner (12+ characters), then Enter: ' YARD_OWNER_PASSWORD
-printf '\n'
-read -r -s -p '3/3 Repeat CMS password, then Enter: ' YARD_OWNER_CONFIRM
-printf '\n'
-if test -z "$YARD_DATABASE_PASSWORD" || test "${#YARD_OWNER_PASSWORD}" -lt 12 || test "$YARD_OWNER_PASSWORD" != "$YARD_OWNER_CONFIRM" || test "$YARD_DATABASE_PASSWORD" = "$YARD_OWNER_PASSWORD"; then
-  unset YARD_DATABASE_PASSWORD YARD_OWNER_PASSWORD YARD_OWNER_CONFIRM
-  echo 'Passwords do not match, are too short, or were reused. No changes made.'
-  exit 1
-fi
+while :; do
+  read -r -s -p '1/3 Database password (hidden), then Enter: ' YARD_DATABASE_PASSWORD
+  printf '\n'
+  if test -n "$YARD_DATABASE_PASSWORD"; then break; fi
+  echo 'EMPTY_DATABASE_PASSWORD: nothing was entered. Please try again.'
+done
+while :; do
+  read -r -s -p '2/3 Choose NEW CMS password for yard-owner (12+ characters), then Enter: ' YARD_OWNER_PASSWORD
+  printf '\n'
+  if test "${#YARD_OWNER_PASSWORD}" -lt 12; then
+    echo 'CMS_PASSWORD_TOO_SHORT: enter at least 12 characters. Please try again.'
+    continue
+  fi
+  if test "$YARD_DATABASE_PASSWORD" = "$YARD_OWNER_PASSWORD"; then
+    echo 'CMS_PASSWORD_REUSED: choose a password different from the database password.'
+    continue
+  fi
+  read -r -s -p '3/3 Repeat CMS password, then Enter: ' YARD_OWNER_CONFIRM
+  printf '\n'
+  if test "$YARD_OWNER_PASSWORD" = "$YARD_OWNER_CONFIRM"; then break; fi
+  unset YARD_OWNER_PASSWORD YARD_OWNER_CONFIRM
+  echo 'CMS_PASSWORD_MISMATCH: the two entries differ. Enter the new CMS password twice again.'
+done
 unset YARD_OWNER_CONFIRM
 wp config create --path="$yard_cms" --dbname=ch197840_yard --dbuser=ch197840_yard --dbhost=localhost --dbprefix=yard_ --prompt=dbpass <<< "$YARD_DATABASE_PASSWORD"
 unset YARD_DATABASE_PASSWORD
