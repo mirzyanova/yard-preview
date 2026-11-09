@@ -120,11 +120,11 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertTrue(deploy.validate_release(release))
     def test_annotated_gallery_composition_and_staggered_spacing(self):
         source=(ROOT/'index.html').read_text()
-        self.assertIn('.mosaic.yard-index .mosaic-column{display:flex;flex-direction:column;gap:clamp(23px,1.6vw,29px)',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column{display:flex;flex-direction:column;gap:clamp(82px,6vw,104px)',source)
         self.assertIn('@media(min-width:901px)',source)
         self.assertIn('.mosaic.yard-index .mosaic-column:nth-child(2) .tile:first-child .tile-visual{aspect-ratio:1.92}',source)
         self.assertIn('.mosaic.yard-index .mosaic-column:nth-child(3) .tile:first-child .tile-visual{aspect-ratio:1.24}',source)
-        self.assertIn('.mosaic.yard-index .mosaic-column:nth-child(3){gap:clamp(35px,2.75vw,47px)}',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column:nth-child(3){gap:clamp(94px,7.3vw,115px)}',source)
         # Do not alter card sizing API, individual cropping or the outer alignment axes.
         self.assertIn('projectCardSize(p,i)',source)
         self.assertIn('cardImage(p)',source)
@@ -136,7 +136,36 @@ class DeploymentBoundaryTests(unittest.TestCase):
             page=(output/'index.html').read_text()
             self.assertIn('aspect-ratio:1.92',page)
             self.assertIn('aspect-ratio:1.24',page)
-            self.assertIn('gap:clamp(23px,1.6vw,29px)',page)
+            self.assertIn('gap:clamp(82px,6vw,104px)',page)
+            self.assertTrue(deploy.validate_release(output))
+
+    def test_portfolio_cards_reveal_with_restored_spacing(self):
+        source=(ROOT/'index.html').read_text()
+        self.assertIn('gap:clamp(82px,6vw,104px)',source)
+        self.assertIn('gap:clamp(94px,7.3vw,115px)',source)
+        self.assertIn('gap:clamp(88px,9vw,110px)',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column{gap:96px}',source)
+        self.assertIn('function bindPortfolioScrollRise()',source)
+        self.assertIn('new IntersectionObserver(function(entries)',source)
+        self.assertIn('entry.target.classList.add("is-revealed")',source)
+        self.assertIn('portfolioRevealObserver.unobserve(entry.target)',source)
+        self.assertIn('portfolioRevealObserver.disconnect()',source)
+        self.assertIn('rootMargin:"0px 0px -7% 0px"',source)
+        self.assertIn('bindPortfolioScrollRise();',source)
+        self.assertIn('#app.portfolio-rise-ready .yard-index .tile:not(.is-revealed)',source)
+        self.assertIn('translate3d(0,clamp(46px,5.5vw,86px),0)',source)
+        self.assertIn('@media(prefers-reduced-motion:reduce)',source)
+        # Do not change the current 3-column composition or captions on the photograph.
+        self.assertIn('grid-template-columns:repeat(3,minmax(0,1fr))',source)
+        self.assertIn('class="tile-caption"',source)
+        self.assertIn('.mosaic.yard-index .tile-visual::after{',source)
+        with tempfile.TemporaryDirectory() as temp:
+            output=Path(temp)/'release'
+            build.build(output,'d'*40)
+            page=(output/'index.html').read_text()
+            self.assertIn('function bindPortfolioScrollRise()',page)
+            self.assertIn('#app.portfolio-rise-ready .yard-index .tile:not(.is-revealed)',page)
+            self.assertIn('gap:clamp(82px,6vw,104px)',page)
             self.assertTrue(deploy.validate_release(output))
 
     def test_three_column_mosaic_and_frame_edge_arrows(self):
