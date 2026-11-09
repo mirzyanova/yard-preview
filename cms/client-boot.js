@@ -38,7 +38,13 @@ var projects = yardPayload.projects.map(function (p, i) {
     description:yardEscape(p.description).replace(/\r?\n/g,'<br>'), image:yardMediaUrl(p.image), gallery:p.gallery.map(yardMediaUrl),
     cardFormat:['horizontal','vertical','square'].includes(p.cardFormat) ? p.cardFormat : 'square',
     homeImage:p.homeImage ? yardMediaUrl(p.homeImage) : null, showOnHome:p.showOnHome === true,
-    hasHorizontalHero:p.hasHorizontalHero === true, homeOrder:Number(p.homeOrder) || 0, displayIndex:i
+    hasHorizontalHero:p.hasHorizontalHero === true,
+    homeCropX:yardCrop(p.homeCropX), homeCropY:yardCrop(p.homeCropY), homeOrder:Number(p.homeOrder) || 0, displayIndex:i
   };
 });
 function yardProjectMeta(p) { return [p.stage,p.year].filter(Boolean).join(' · '); }
+
+function yardCrop(value) { return Number.isInteger(value) ? Math.max(0, Math.min(100, value)) : 50; }
+function yardHeroImage(p) {
+  return img(heroImage(p), p.name).replace('<img ', '<img style="object-position:' + p.homeCropX + '% ' + p.homeCropY + '%" ');
+}
