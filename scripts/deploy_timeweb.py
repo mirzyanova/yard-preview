@@ -34,7 +34,11 @@ def request_deploy(data, content_type, release=''):
     if release: headers['X-Yard-Release']=release
     request=urllib.request.Request(SITE+'cms/?rest_route=/yard/v1/deploy',data=data,headers=headers,method='POST')
     with urllib.request.urlopen(request,timeout=90,context=ssl.create_default_context()) as response:
-        result=json.loads(response.read(100000))
+        raw=response.read(100000)
+        try:
+            result=json.loads(raw)
+        except (ValueError, UnicodeDecodeError) as error:
+            raise RuntimeError('Timeweb returned non-JSON HTTP response (status=%s, content-type=%s, bytes=%s)' % (response.status,response.headers.get('Content-Type'),len(raw))) from error
         if result.get('ok') is not True or not SHA.fullmatch(result.get('release','')): raise RuntimeError('Deployment was not confirmed')
         return result
 
@@ -58,10 +62,14 @@ def run(root,operation):
         if archive.tell()>30*1024*1024: raise RuntimeError('Static release exceeds the server upload limit')
         result=request_deploy(archive.getvalue(),'application/zip',manifest['release'])
     try: health_check(result['release'])
-    except Exception:
+    except Exception as check_error:
+        print('Release health check failed: '+repr(check_error),flush=True)
         if result.get('previous') and result['previous']!=result['release']:
-            restored=request_deploy(json.dumps({'operation':'rollback','expectedCurrent':result['release']}).encode(),'application/json')
-            print('Health check failed; restored the previous release: '+restored['release'])
+            try:
+                restored=request_deploy(json.dumps({'operation':'rollback','expectedCurrent':result['release']}).encode(),'application/json')
+                print('Restored previous release: '+restored['release'],flush=True)
+            except Exception as rollback_error:
+                raise RuntimeError('Release health check failed and rollback could not be verified: '+repr(rollback_error)) from check_error
         raise
     print('Verified active release: '+result['release'])
 
