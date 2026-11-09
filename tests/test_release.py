@@ -34,7 +34,7 @@ class DeploymentBoundaryTests(unittest.TestCase):
         self.assertNotIn('class="tile-info"',source)
         self.assertIn('.mosaic .tile-visual{display:block',source)
         self.assertIn('.mosaic .tile:hover .tile-caption',source)
-        self.assertIn('.mosaic .tile{overflow:visible}',source)
+        self.assertIn('.mosaic .mosaic-column .tile{aspect-ratio:auto !important',source)
         # Releasing to Timeweb must preserve the changed markup and layout CSS.
         with tempfile.TemporaryDirectory() as temp:
             target=Path(temp)/'release'
