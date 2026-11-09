@@ -479,54 +479,55 @@
 }
 @media(prefers-reduced-motion:reduce){.project-gallery-canvas,.project-gallery-thumb{transition:none}}
 
-/* Portfolio v2 — a measured two-column editorial grid with wide anchor projects.
-   Three WordPress sizes map to large/full-width, medium/column, small/reduced column. */
-.mosaic.yard-index{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:row;align-items:start;column-gap:clamp(30px,3.2vw,56px);row-gap:clamp(72px,7.2vw,125px);width:calc(100% - 2 * var(--page));max-width:none;margin:0 var(--page);padding-bottom:clamp(110px,12vw,190px)}
-.mosaic.yard-index .tile{display:block;position:relative;grid-column:span 1;align-self:start;justify-self:stretch!important;width:100%!important;min-width:0;aspect-ratio:auto!important;background:#fff;overflow:visible;box-shadow:none}
-.mosaic.yard-index .tile.size-large{grid-column:1/-1;width:100%!important;justify-self:stretch!important}
-.mosaic.yard-index .tile.size-large.format-square{width:min(76%,1020px)!important;justify-self:center!important}
-.mosaic.yard-index .tile.size-large.format-vertical{width:min(52%,760px)!important;justify-self:center!important}
-.mosaic.yard-index .tile.size-small{width:80%!important}
-.mosaic.yard-index .tile.size-small.align-left{justify-self:start!important}
-.mosaic.yard-index .tile.size-small.align-right{justify-self:end!important}
+/* Portfolio v3 — airy but coherent three-column editorial masonry.
+   The first and last columns lock to the site's page axes. */
+.mosaic.yard-index{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start;column-gap:clamp(16px,1.75vw,30px);row-gap:0;width:calc(100% - 2 * var(--page));max-width:none;margin:0 var(--page);padding-bottom:clamp(105px,10vw,165px)}
+.mosaic.yard-index .mosaic-column{display:flex;flex-direction:column;gap:clamp(44px,4.3vw,68px);min-width:0;align-items:stretch}
+.mosaic.yard-index .tile{display:block;position:relative;grid-column:auto;flex:0 0 auto;align-self:center;justify-self:auto!important;width:100%;min-width:0;aspect-ratio:auto!important;background:#fff;overflow:visible;box-shadow:none}
+.mosaic.yard-index .tile.size-small{width:82%!important}
+.mosaic.yard-index .tile.size-medium{width:94%!important}
+.mosaic.yard-index .tile.size-large{width:100%!important}
+.mosaic.yard-index .mosaic-column:first-child .tile{align-self:flex-start!important}
+.mosaic.yard-index .mosaic-column:last-child .tile{align-self:flex-end!important}
+.mosaic.yard-index .mosaic-column:nth-child(2) .tile{align-self:center!important}
 .mosaic.yard-index .tile-visual{display:block;position:relative;width:100%;height:auto;overflow:hidden;transform-origin:center;transition:transform .4s cubic-bezier(.2,.65,.22,1)}
 .mosaic.yard-index .tile.format-horizontal .tile-visual{aspect-ratio:1.56}
 .mosaic.yard-index .tile.format-square .tile-visual{aspect-ratio:1}
 .mosaic.yard-index .tile.format-vertical .tile-visual{aspect-ratio:.78}
-.mosaic.yard-index .tile.size-large.format-horizontal .tile-visual{aspect-ratio:2.05}
 .mosaic.yard-index .tile-visual img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover}
 .mosaic.yard-index .tile:hover .tile-visual,.mosaic.yard-index .tile:focus-visible .tile-visual{transform:scale(1.014)}
-.mosaic.yard-index .tile-caption{position:static;display:flex;flex-direction:column;gap:5px;padding-top:15px;min-height:68px;opacity:0;transform:none;transition:opacity .2s ease;background:transparent;color:#1d1d1d;pointer-events:none}
+.mosaic.yard-index .tile-caption{position:static;display:flex;flex-direction:column;gap:5px;padding-top:12px;min-height:62px;opacity:0;transform:none;transition:opacity .2s ease;background:transparent;color:#1d1d1d;pointer-events:none}
 .mosaic.yard-index .tile:hover .tile-caption,.mosaic.yard-index .tile:focus-visible .tile-caption{opacity:1}
-.mosaic.yard-index .tile-caption strong{font-family:"Sitka Text",Cambria,Georgia,serif;font-size:clamp(16px,1.32vw,20px);font-weight:400;line-height:1.27;letter-spacing:-.008em}
-.mosaic.yard-index .tile-caption small{font-size:11px;color:#777;line-height:1.45}
+.mosaic.yard-index .tile-caption strong{font-family:"Sitka Text",Cambria,Georgia,serif;font-size:clamp(14px,1.16vw,17px);font-weight:400;line-height:1.28;letter-spacing:-.006em}
+.mosaic.yard-index .tile-caption small{font-size:11px;color:#777;line-height:1.4}
 @media(hover:none){.mosaic.yard-index .tile-caption{opacity:1}}
 @media(max-width:900px){
- .mosaic.yard-index{column-gap:clamp(22px,3.7vw,35px);row-gap:clamp(53px,6.5vw,78px)}
+ .mosaic.yard-index{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:clamp(16px,2.6vw,24px)}
+ .mosaic.yard-index .mosaic-column{gap:clamp(40px,5vw,58px)}
+ .mosaic.yard-index .mosaic-column:nth-child(2) .tile{align-self:flex-end!important}
  .mosaic.yard-index .tile.size-small{width:87%!important}
- .mosaic.yard-index .tile.size-large.format-vertical{width:65%!important}
+ .mosaic.yard-index .tile.size-medium{width:96%!important}
 }
-@media(max-width:650px){
- .mosaic.yard-index{grid-template-columns:minmax(0,1fr);column-gap:0;row-gap:clamp(45px,9vw,68px)}
- .mosaic.yard-index .tile,.mosaic.yard-index .tile.size-large{grid-column:1/-1}
- .mosaic.yard-index .tile.size-large.format-square,.mosaic.yard-index .tile.size-large.format-vertical{width:100%!important}
- .mosaic.yard-index .tile.size-small{width:87%!important;justify-self:center!important}
- .mosaic.yard-index .tile.size-large.format-horizontal .tile-visual{aspect-ratio:1.56}
- .mosaic.yard-index .tile-caption{min-height:61px;padding-top:11px}
- .mosaic.yard-index .tile-caption strong{font-size:18px}
+@media(max-width:600px){
+ .mosaic.yard-index{grid-template-columns:minmax(0,1fr);column-gap:0}
+ .mosaic.yard-index .mosaic-column{gap:42px}
+ .mosaic.yard-index .mosaic-column:first-child .tile,.mosaic.yard-index .mosaic-column:last-child .tile,.mosaic.yard-index .mosaic-column:nth-child(2) .tile{align-self:center!important}
+ .mosaic.yard-index .tile.size-small{width:90%!important}
+ .mosaic.yard-index .tile.size-medium{width:97%!important}
+ .mosaic.yard-index .tile-caption{min-height:58px;padding-top:10px}
+ .mosaic.yard-index .tile-caption strong{font-size:16px}
 }
-/* Slider arrows only reveal over outer quarters of the photograph itself.
-   Not over empty white margins, thumbnail strip or the central half. */
-.project-gallery-photo{position:relative;display:inline-flex;align-items:center;justify-content:center;max-width:100%;max-height:100%;width:max-content;height:auto;line-height:0}
-.project-gallery-photo .project-gallery-image{display:block;width:auto;height:auto;max-width:100%;max-height:min(76svh,800px);object-fit:contain}
-.project-gallery-photo .project-gallery-arrow{position:absolute;top:0;bottom:0;transform:none;width:25%;height:100%;min-width:0;min-height:0;padding:clamp(8px,1.5vw,22px);box-sizing:border-box;z-index:3;display:flex;align-items:center;border:0;background:transparent;color:#fff;mix-blend-mode:difference;opacity:0;transition:opacity .16s ease;cursor:pointer}
-.project-gallery-photo .project-gallery-prev{left:0;right:auto;justify-content:flex-start}
-.project-gallery-photo .project-gallery-next{right:0;left:auto;justify-content:flex-end}
-@media(hover:hover){.project-gallery-photo .project-gallery-arrow:hover,.project-gallery-photo .project-gallery-arrow:focus-visible{opacity:1}}
-@media(hover:none){.project-gallery-photo .project-gallery-arrow{opacity:1}}
-@media(max-width:900px){.project-gallery-photo .project-gallery-image{max-height:min(67svh,660px)}}
-@media(max-width:600px){.project-gallery-photo .project-gallery-image{max-height:min(58svh,490px)}.project-gallery-photo .project-gallery-arrow{padding:5px}}
-@media(prefers-reduced-motion:reduce){.mosaic.yard-index .tile-visual,.mosaic.yard-index .tile-caption,.project-gallery-photo .project-gallery-arrow{transition:none}}
+/* Gallery arrows are attached to the entire gallery frame, at the far outer
+   site axes. The transparent hit areas occupy its left/right quarter. */
+.project-gallery-stage{position:relative}
+.project-gallery-stage .project-gallery-arrow{position:absolute;top:0;bottom:0;transform:none;width:25%;height:100%;min-width:0;min-height:0;padding:clamp(9px,1.5vw,23px) 0;box-sizing:border-box;z-index:3;display:flex;align-items:center;border:0;background:transparent;color:#181818;opacity:0;transition:opacity .16s ease;cursor:pointer}
+.project-gallery-stage .project-gallery-prev{left:0;right:auto;justify-content:flex-start}
+.project-gallery-stage .project-gallery-next{right:0;left:auto;justify-content:flex-end}
+.project-gallery-stage .project-gallery-arrow svg{width:30px;height:30px;stroke-width:1.45;flex:none}
+@media(hover:hover){.project-gallery-stage .project-gallery-arrow:hover,.project-gallery-stage .project-gallery-arrow:focus-visible{opacity:1}}
+@media(hover:none){.project-gallery-stage .project-gallery-arrow{opacity:1}}
+@media(max-width:600px){.project-gallery-stage .project-gallery-arrow{padding:4px 0}.project-gallery-stage .project-gallery-arrow svg{width:25px;height:25px}}
+@media(prefers-reduced-motion:reduce){.mosaic.yard-index .tile-visual,.mosaic.yard-index .tile-caption,.project-gallery-stage .project-gallery-arrow{transition:none}}
 </style>
 </head>
 <body>
@@ -647,22 +648,25 @@ function allProjects(view){
 projectView=view||projectView;
 if(projectView==='list'){renderProjectList();return}
 
-/* A curated size rhythm is the default; the CMS may override per project. */
-var sizes=["large","medium","medium","small","medium","large","medium","medium"];
-function projectCardSize(p,index){return ["small","medium","large"].includes(p.cardSize)?p.cardSize:sizes[index%sizes.length]}
-
-/* A two-column editorial rhythm with full-width feature projects.
-   Each WordPress cardSize override stays authoritative. */
-var slot=0;
-var cards=projects.map(function(p,i){
-var size=projectCardSize(p,i),format=projectCardFormat(p),lane=size==="large"?"wide":(slot===0?"left":"right");
-slot=size==="large"?0:1-slot;
+/* Deterministic three-column composition: a shared top edge, equal column rails,
+   varied image formats and a restrained, repeating hierarchy of card widths. */
+var rhythm=["large","medium","large","medium","large","medium","small","large","medium"];
+function projectCardSize(p,index){return ["small","medium","large"].includes(p.cardSize)?p.cardSize:rhythm[index%rhythm.length]}
+var columnCount=mosaicColumnCount();
+var columns=Array.from({length:columnCount},function(){return []});
+projects.forEach(function(project,index){columns[index%columnCount].push({project:project,index:index})});
+var markup=columns.map(function(items,col){
+return '<div class="mosaic-column">'+items.map(function(entry){
+var p=entry.project,i=entry.index;
+var align=columnCount===1?'center':(col===0?'left':(col===columnCount-1?'right':'center'));
+var size=projectCardSize(p,i),format=projectCardFormat(p);
 var meta=[p.stage,p.year].filter(Boolean).join(' · ');
-return '<a class="tile format-'+format+' size-'+size+' align-'+lane+'" href="#/projects/'+p.id+'" aria-label="'+p.name+(meta?", "+meta:"")+'">'+
+return '<a class="tile format-'+format+' size-'+size+' align-'+align+'" href="#/projects/'+p.id+'" aria-label="'+p.name+(meta?', '+meta:'')+'">'+
 '<span class="tile-visual">'+cardImage(p)+'</span><span class="tile-caption"><strong>'+p.name+'</strong>'+(meta?'<small>'+meta+'</small>':'')+'</span></a>'
-}).join("");
-app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic yard-index" aria-label="Все проекты">'+cards+'</section>';
-app.dataset.mosaicColumns="2";
+}).join('')+'</div>'
+}).join('');
+app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic yard-index" aria-label="Все проекты">'+markup+'</section>';
+app.dataset.mosaicColumns=String(columnCount);
 }
 
 
@@ -691,9 +695,9 @@ var items=projectGalleryItems(p),count=items.length;
 if(!count)return '';
 var first=items[0],alt=p.name;
 return '<section class="project-gallery" aria-label="Фотографии проекта"><div class="project-gallery-stage" tabindex="0" aria-label="Галерея: листайте стрелками">'+
-'<div class="project-gallery-canvas size-'+first.size+'"><div class="project-gallery-photo"><img class="project-gallery-image" src="'+first.url+'" alt="'+alt+' — изображение 1" fetchpriority="high" decoding="async">'+
+'<div class="project-gallery-canvas size-'+first.size+'"><img class="project-gallery-image" src="'+first.url+'" alt="'+alt+' — изображение 1" fetchpriority="high" decoding="async"></div>'+
 (count>1?'<button type="button" class="project-gallery-arrow project-gallery-prev" aria-label="Предыдущее фото">'+iconSvg("prev")+'</button><button type="button" class="project-gallery-arrow project-gallery-next" aria-label="Следующее фото">'+iconSvg("next")+'</button>':'')+
-'</div></div></div><div class="project-gallery-navigation">'+
+'</div><div class="project-gallery-navigation">'+
 '<div class="project-gallery-thumbs" role="group" aria-label="Выбрать фотографию">'+items.map(function(item,i){
 return '<button class="project-gallery-thumb'+(i===0?' active':'')+'" type="button" data-index="'+i+'" aria-label="Фото '+(i+1)+' из '+count+'" aria-pressed="'+(i===0?'true':'false')+'"><img src="'+item.url+'" alt="" loading="lazy" decoding="async"></button>'
 }).join('')+'</div><span class="project-gallery-count" aria-live="polite">01 / '+String(count).padStart(2,'0')+'</span></div></section>'
