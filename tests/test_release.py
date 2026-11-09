@@ -118,6 +118,30 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn('galleryItems:Array.isArray(p.galleryItems)',site)
             self.assertNotIn('bindSlideshow(app.querySelector(".gallery")',site)
             self.assertTrue(deploy.validate_release(release))
+    def test_two_column_editorial_grid_and_image_edge_arrows(self):
+        source=(ROOT/'index.html').read_text()
+        self.assertIn('class="mosaic yard-index"',source)
+        self.assertIn('var cards=projects.map(function(p,i)',source)
+        self.assertIn('projectCardSize(p,i)',source)
+        self.assertIn('.mosaic.yard-index{display:grid;grid-template-columns:repeat(2',source)
+        self.assertIn('.mosaic.yard-index .tile.size-large{grid-column:1/-1',source)
+        self.assertIn('.mosaic.yard-index .tile.size-small.align-left',source)
+        self.assertIn('.mosaic.yard-index .tile.size-small.align-right',source)
+        self.assertIn('function projectGalleryItems(p)',source)
+        self.assertIn('class="project-gallery-photo"',source)
+        self.assertIn('.project-gallery-photo .project-gallery-arrow{position:absolute;top:0;bottom:0;transform:none;width:25%',source)
+        self.assertIn('.project-gallery-photo .project-gallery-arrow:hover',source)
+        self.assertIn('.project-gallery-photo .project-gallery-arrow:focus-visible',source)
+        self.assertNotIn('<h2 class="project-story-label">ПРОЕКТ</h2>',source)
+        with tempfile.TemporaryDirectory() as temp:
+            output=Path(temp)/'release'
+            build.build(output,'f'*40)
+            compiled=(output/'index.html').read_text()
+            self.assertIn('class="mosaic yard-index"',compiled)
+            self.assertIn('class="project-gallery-photo"',compiled)
+            self.assertIn('width:25%',compiled)
+            self.assertNotIn('<h2 class="project-story-label">ПРОЕКТ</h2>',compiled)
+            self.assertTrue(deploy.validate_release(output))
     def test_real_projects_only_and_missing_data_remains_empty(self):
         projects=json.loads((ROOT/'cms/yard-projects/seed.json').read_text())['projects']
         self.assertEqual([len(p['photos']) for p in projects],[3,8])
