@@ -482,13 +482,13 @@
 /* Portfolio v3 — airy but coherent three-column editorial masonry.
    The first and last columns lock to the site's page axes. */
 .mosaic.yard-index{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start;column-gap:clamp(16px,1.75vw,30px);row-gap:0;width:calc(100% - 2 * var(--page));max-width:none;margin:0 var(--page);padding-bottom:clamp(105px,10vw,165px)}
-.mosaic.yard-index .mosaic-column{display:flex;flex-direction:column;gap:clamp(23px,1.6vw,29px);min-width:0;align-items:stretch}
+.mosaic.yard-index .mosaic-column{display:flex;flex-direction:column;gap:clamp(82px,6vw,104px);min-width:0;align-items:stretch}
 /* Screenshot-matched first-row rhythm: the central plan is panoramic, the right
    landscape frame is a calm near-square. The original images are never modified. */
 @media(min-width:901px){
  .mosaic.yard-index .mosaic-column:nth-child(2) .tile:first-child .tile-visual{aspect-ratio:1.92}
  .mosaic.yard-index .mosaic-column:nth-child(3) .tile:first-child .tile-visual{aspect-ratio:1.24}
- .mosaic.yard-index .mosaic-column:nth-child(3){gap:clamp(35px,2.75vw,47px)}
+ .mosaic.yard-index .mosaic-column:nth-child(3){gap:clamp(94px,7.3vw,115px)}
 }
 .mosaic.yard-index .tile{display:block;position:relative;grid-column:auto;flex:0 0 auto;align-self:center;justify-self:auto!important;width:100%;min-width:0;aspect-ratio:auto!important;background:#fff;overflow:visible;box-shadow:none}
 .mosaic.yard-index .tile.size-small{width:82%!important}
@@ -510,14 +510,14 @@
 @media(hover:none){.mosaic.yard-index .tile-caption{opacity:1}}
 @media(max-width:900px){
  .mosaic.yard-index{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:clamp(16px,2.6vw,24px)}
- .mosaic.yard-index .mosaic-column{gap:clamp(40px,5vw,58px)}
+ .mosaic.yard-index .mosaic-column{gap:clamp(88px,9vw,110px)}
  .mosaic.yard-index .mosaic-column:nth-child(2) .tile{align-self:flex-end!important}
  .mosaic.yard-index .tile.size-small{width:87%!important}
  .mosaic.yard-index .tile.size-medium{width:96%!important}
 }
 @media(max-width:600px){
  .mosaic.yard-index{grid-template-columns:minmax(0,1fr);column-gap:0}
- .mosaic.yard-index .mosaic-column{gap:42px}
+ .mosaic.yard-index .mosaic-column{gap:96px}
  .mosaic.yard-index .mosaic-column:first-child .tile,.mosaic.yard-index .mosaic-column:last-child .tile,.mosaic.yard-index .mosaic-column:nth-child(2) .tile{align-self:center!important}
  .mosaic.yard-index .tile.size-small{width:90%!important}
  .mosaic.yard-index .tile.size-medium{width:97%!important}
@@ -591,6 +591,23 @@
 @media(prefers-reduced-motion:reduce){
  .mosaic.yard-index .tile-visual::after,.mosaic.yard-index .tile-caption{transition:none}
 }
+
+/* Projects rise into view with the same restrained motion as the homepage.
+   Apply animation to the whole tile, leaving image hover zoom and overlay intact. */
+@media(prefers-reduced-motion:no-preference){
+ #app.portfolio-rise-ready .yard-index .tile{
+   opacity:1;transform:translate3d(0,0,0);
+   transition:opacity 900ms cubic-bezier(.18,.66,.22,1),
+              transform 1050ms cubic-bezier(.16,1,.3,1);
+ }
+ #app.portfolio-rise-ready .yard-index .tile:not(.is-revealed){
+   opacity:0;transform:translate3d(0,clamp(46px,5.5vw,86px),0);
+   pointer-events:none;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ #app .yard-index .tile{opacity:1!important;transform:none!important;transition:none!important}
+}
 </style>
 </head>
 <body>
@@ -633,7 +650,7 @@ function projectDetail(p){
 var intro=p.intro||'',body=p.description||'';
 return intro||body?'<div class="project-story-description"><h2 class="project-story-label">О ПРОЕКТЕ</h2><div class="detail-copy">'+(intro?'<p class="detail-intro">'+intro+'</p>':'')+(body?'<p class="detail-body">'+body+'</p>':'')+'</div></div>':''
 }
-var app=document.getElementById("app"), timer=null, clearEvents=function(){}, projectView="grid";
+var app=document.getElementById("app"), timer=null, clearEvents=function(){}, projectView="grid", portfolioRevealObserver=null;
 function page(id){window.location.hash="#/"+id}
 function img(url,alt){var missing=url.indexOf("erfurt-")===0?' onerror="this.onerror=null;this.src=\'assets/erfurt-photo-pending.svg\'"':'';return '<img src="'+url+'" alt="'+alt+'" loading="lazy"'+missing+'>'}
 function iconSvg(kind,cssClass){
@@ -731,6 +748,29 @@ app.dataset.mosaicColumns='list';
 showProjectListPreview()
 }
 function mosaicColumnCount(){return window.innerWidth<=600?1:(window.innerWidth<=900?2:3)}
+/* Portfolio scroll entrance follows the same IntersectionObserver approach as the
+   homepage blocks, but observes individual project cards so later uploads reveal
+   naturally as the visitor reaches them. Hover zoom remains independent. */
+function bindPortfolioScrollRise(){
+if(portfolioRevealObserver){portfolioRevealObserver.disconnect();portfolioRevealObserver=null}
+var tiles=Array.from(app.querySelectorAll(".yard-index .tile"));
+if(!tiles.length)return;
+if(!("IntersectionObserver" in window)||window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+app.classList.remove("portfolio-rise-ready");
+return
+}
+app.classList.add("portfolio-rise-ready");
+var observer=new IntersectionObserver(function(entries){
+entries.forEach(function(entry){
+if(entry.isIntersecting){
+entry.target.classList.add("is-revealed");
+observer.unobserve(entry.target)
+}
+})
+},{threshold:0.12,rootMargin:"0px 0px -7% 0px"});
+portfolioRevealObserver=observer;
+tiles.forEach(function(tile){observer.observe(tile)})
+}
 function allProjects(view){
 projectView=view||projectView;
 if(projectView==='list'){renderProjectList();return}
@@ -754,6 +794,7 @@ return '<a class="tile format-'+format+' size-'+size+' align-'+align+'" href="#/
 }).join('');
 app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic yard-index" aria-label="Все проекты">'+markup+'</section>';
 app.dataset.mosaicColumns=String(columnCount);
+bindPortfolioScrollRise();
 }
 
 
@@ -864,7 +905,7 @@ app.innerHTML='<section class="contacts"><div class="contacts-heading"><h1>Ко�
 '<p class="contact-form-status" role="status" aria-live="polite"></p></form></section></section>';
 bindContactForm();
 }
-function route(){clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"||r.indexOf("/projects?")===0){var selectedView=/[?&]view=list(?:&|$)/.test(r)?"list":(/[?&]view=grid(?:&|$)/.test(r)?"grid":projectView);allProjects(selectedView)}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
+function route(){if(portfolioRevealObserver){portfolioRevealObserver.disconnect();portfolioRevealObserver=null}app.classList.remove("portfolio-rise-ready");clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"||r.indexOf("/projects?")===0){var selectedView=/[?&]view=list(?:&|$)/.test(r)?"list":(/[?&]view=grid(?:&|$)/.test(r)?"grid":projectView);allProjects(selectedView)}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
 window.addEventListener("resize",function(){var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";if((r==="/projects"||r.indexOf("/projects?")===0)&&projectView==="grid"&&app.dataset.mosaicColumns!==String(mosaicColumnCount()))allProjects("grid")});
 window.addEventListener("hashchange",route);route();
 var cb=document.getElementById("cookieBanner");
