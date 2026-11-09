@@ -61,6 +61,29 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn('function projectCardSize(p,index)',final)
             self.assertIn('.mosaic .tile-caption{display:flex;position:static;',final)
             self.assertIn("cardSize:['small','medium','large']",final)
+    def test_crop_home_order_and_two_level_project_text(self):
+        source=(ROOT/'index.html').read_text()
+        plugin=(ROOT/'cms/yard-projects/yard-projects.php').read_text()
+        boot=(ROOT/'cms/client-boot.js').read_text()
+        self.assertIn('function cardImage(p)',source)
+        self.assertIn('object-position:',source)
+        self.assertIn('data-crop-x=',source)
+        self.assertIn('function projectDetail(p)',source)
+        self.assertIn('class="detail-intro"',source)
+        self.assertIn('class="detail-body"',source)
+        self.assertIn("cardCropX:yardCrop(p.cardCropX)",boot)
+        self.assertIn("intro:yardEscape(p.intro)",boot)
+        self.assertIn("function yard_home_positions(",plugin)
+        self.assertIn("name=\"yard_home_order\"",plugin)
+        with tempfile.TemporaryDirectory() as temp:
+            release=Path(temp)/'release'
+            build.build(release,'d'*40)
+            html=(release/'index.html').read_text()
+            self.assertIn('function cardImage(p)',html)
+            self.assertIn('function projectDetail(p)',html)
+            self.assertIn("intro:yardEscape(p.intro)",html)
+            self.assertIn("data-crop-x=",html)
+            self.assertIn('class="detail-body"',html)
     def test_real_projects_only_and_missing_data_remains_empty(self):
         projects=json.loads((ROOT/'cms/yard-projects/seed.json').read_text())['projects']
         self.assertEqual([len(p['photos']) for p in projects],[3,8])

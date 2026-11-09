@@ -30,38 +30,57 @@
     else { li.next().after(li); }
     syncGallery();
   });
-  function applyCrop(control) {
-    var x = control.find('[name="yard_home_crop_x"]').val();
-    var y = control.find('[name="yard_home_crop_y"]').val();
-    control.find('.yard-media-preview img').css('object-position', x + '% ' + y + '%');
+
+  function previewFormat(img) {
+    if (!img || !img.naturalWidth || !img.naturalHeight) return 'square';
+    var ratio=img.naturalWidth/img.naturalHeight;
+    return ratio>1.2?'horizontal':(ratio<.85?'vertical':'square');
   }
-  var home = $('.yard-media-control[data-field="home_image"]');
-  home.on('input change', 'input[type="range"]', function () { applyCrop(home); });
-  home.on('click', '.yard-center-crop', function () {
-    home.find('input[type="range"]').val(50);
-    applyCrop(home);
+  function applyCrop(control) {
+    var field=control.data('field')==='home_image'?'home':'card';
+    var x=Number(control.find('[name="yard_'+field+'_crop_x"]').val());
+    var y=Number(control.find('[name="yard_'+field+'_crop_y"]').val());
+    control.find('.yard-media-preview img').css('object-position',(Number.isFinite(x)?x:50)+'% '+(Number.isFinite(y)?y:50)+'%');
+  }
+  function syncCardPreview() {
+    var cover=$('.yard-media-control[data-field="cover"]');
+    var chosen=$('[name="yard_card_format"]').val()||'auto';
+    cover.attr('data-format',chosen==='auto'?previewFormat(cover.find('.yard-media-preview img')[0]):chosen);
+    applyCrop(cover);
+  }
+  $('.yard-media-control').on('input change','.yard-crop-controls input[type="range"]',function(){applyCrop($(this).closest('.yard-media-control'));});
+  $('.yard-media-control').on('click','.yard-center-crop',function(){
+    var control=$(this).closest('.yard-media-control');
+    control.find('.yard-crop-controls input[type="range"]').val(50);
+    applyCrop(control);
   });
-  applyCrop(home);
-  $('.yard-pick-image').on('click', function () {
-    var control = $(this).closest('.yard-media-control');
-    var frame = wp.media({title: control.find('h3').text(), button: {text: 'Выбрать'}, library: {type: 'image'}, multiple: false});
-    frame.on('select', function () {
-      var item = frame.state().get('selection').first().toJSON();
-      var isHome = control.data('field') === 'home_image';
-      var selection = control.find('input[type="hidden"]');
-      if (isHome && Number(selection.val()) !== item.id) { control.find('input[type="range"]').val(50); }
-      selection.val(item.id);
-      var size = item.sizes && item.sizes[isHome ? 'yard_large' : 'thumbnail'];
-      control.find('.yard-media-preview').empty().append($('<img>').attr({src: size ? size.url : item.url, alt: ''}));
-      if (isHome) {
-        control.find('.yard-crop-controls').prop('hidden', false);
-        applyCrop(control);
+  $('[name="yard_card_format"]').on('change',syncCardPreview);
+  $('.yard-media-control[data-field="cover"]').on('load','.yard-media-preview img',syncCardPreview);
+  $('.yard-media-control').each(function(){applyCrop($(this))});
+  syncCardPreview();
+  $('.yard-pick-image').on('click',function(){
+    var control=$(this).closest('.yard-media-control');
+    var frame=wp.media({title:control.find('h3').text(),button:{text:'Выбрать'},library:{type:'image'},multiple:false});
+    frame.on('select',function(){
+      var item=frame.state().get('selection').first().toJSON();
+      var isHome=control.data('field')==='home_image';
+      if(Number(control.find('input[type="hidden"]').val())!==Number(item.id)){
+        control.find('.yard-crop-controls input[type="range"]').val(50);
       }
+      control.find('input[type="hidden"]').val(item.id);
+      var sizes=item.sizes||{}, size=isHome?(sizes.yard_large||sizes.large||sizes.full):(sizes.yard_card||sizes.large||sizes.full);
+      control.find('.yard-media-preview').empty().append($('<img>').attr({src:size?size.url:item.url,alt:'Предпросмотр кадрирования'}));
+      control.find('.yard-crop-controls').prop('hidden',false);
+      applyCrop(control);
+      if(isHome)control.attr('data-format','horizontal');else syncCardPreview();
     });
     frame.open();
   });
-  $('.yard-clear-image').on('click', function () {
-    var control = $(this).closest('.yard-media-control'); control.find('input[type="hidden"]').val('0'); control.find('.yard-media-preview').empty();
-    control.find('.yard-crop-controls').prop('hidden', true);
+  $('.yard-clear-image').on('click',function(){
+    var control=$(this).closest('.yard-media-control');
+    control.find('input[type="hidden"]').val('0');
+    control.find('.yard-media-preview').empty();
+    control.find('.yard-crop-controls').prop('hidden',true);
+    if(control.data('field')==='cover')syncCardPreview();
   });
 })(jQuery);
