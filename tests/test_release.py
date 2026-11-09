@@ -23,6 +23,27 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertTrue(deploy.validate_release(release))
             (release/'wp-config.php').write_text('private')
             with self.assertRaises(ValueError):deploy.validate_release(release)
+    def test_portfolio_hover_caption_and_launch_copy(self):
+        source=(ROOT/'index.html').read_text()
+        self.assertNotIn('ЭСКИЗ · ПОРТФОЛИО ПОСТЕПЕННО ЗАПОЛНЯЕТСЯ',source)
+        self.assertNotIn('эскиз сайта',source)
+        self.assertIn('Для обеспечения работы сайта используются файлы cookie.',source)
+        self.assertNotIn('Это тестовая версия сайта. Рекламные',source)
+        self.assertIn('class="tile-visual"',source)
+        self.assertIn('class="tile-caption"',source)
+        self.assertNotIn('class="tile-info"',source)
+        self.assertIn('.mosaic .tile-visual{display:block',source)
+        self.assertIn('.mosaic .tile:hover .tile-caption',source)
+        self.assertIn('.mosaic .tile{overflow:visible}',source)
+        # Releasing to Timeweb must preserve the changed markup and layout CSS.
+        with tempfile.TemporaryDirectory() as temp:
+            target=Path(temp)/'release'
+            build.build(target,'b'*40)
+            production=(target/'index.html').read_text()
+            self.assertIn('class="tile-caption"',production)
+            self.assertIn('class="tile-visual"',production)
+            self.assertIn('.mosaic{column-gap:clamp(26px,3.1vw,50px)}',production)
+            self.assertNotIn('ЭСКИЗ · ПОРТФОЛИО',production)
     def test_real_projects_only_and_missing_data_remains_empty(self):
         projects=json.loads((ROOT/'cms/yard-projects/seed.json').read_text())['projects']
         self.assertEqual([len(p['photos']) for p in projects],[3,8])

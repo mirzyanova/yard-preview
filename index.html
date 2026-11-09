@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#ffffff">
-<title>ЯРД — архитектурное бюро · эскиз сайта</title>
+<title>ЯРД — архитектурное бюро</title>
 <style>
 :root{--paper:#fff;--ink:#161616;--muted:#777;--page:clamp(22px,4vw,70px);--font:Arial,Helvetica,sans-serif}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button{font:inherit}button:focus-visible,a:focus-visible{outline:2px solid #444;outline-offset:5px}
@@ -363,14 +363,40 @@
 .contact-form-fields .contact-message-field{grid-column:auto}
 .contact-form-fields input,.contact-form-fields textarea{font-size:16px}
 }
+
+/* 2026-11-09: editorial portfolio rhythm, same outer axes and independent masonry columns. */
+.mosaic{column-gap:clamp(26px,3.1vw,50px)}
+.mosaic-row .tile.size-small{width:88% !important}
+.mosaic-row .tile.size-medium{width:94% !important}
+.mosaic-row .tile.size-large{width:100% !important}
+.mosaic .tile{overflow:visible}
+.mosaic .tile-visual{display:block;width:100%;height:100%;overflow:hidden;transition:transform .42s cubic-bezier(.2,.68,.2,1);transform-origin:center}
+.mosaic .tile-visual img{width:100%;height:100%;object-fit:cover;display:block;transition:none}
+.mosaic .tile:hover .tile-visual,.mosaic .tile:focus-visible .tile-visual{transform:scale(1.028)}
+.mosaic .tile:hover img{transform:none}
+.mosaic .tile-caption{display:flex;flex-direction:column;gap:4px;position:absolute;top:calc(100% + 13px);left:0;right:0;color:var(--ink);opacity:0;transform:translateY(-4px);transition:opacity .24s ease,transform .24s ease;pointer-events:none}
+.mosaic .tile:hover .tile-caption,.mosaic .tile:focus-visible .tile-caption{opacity:1;transform:translateY(0)}
+.mosaic .tile-caption strong{font-family:"Sitka Text",Cambria,Georgia,serif;font-size:clamp(17px,1.38vw,22px);font-weight:400;line-height:1.25;letter-spacing:-.012em}
+.mosaic .tile-caption small{font-size:12px;color:#777;line-height:1.4}
+@media(hover:none){.mosaic .tile-caption{opacity:1;transform:none}}
+@media(max-width:900px){
+ .mosaic{column-gap:clamp(21px,3.8vw,36px)}
+ .mosaic .mosaic-column{gap:clamp(86px,8.5vw,112px)}
+}
+@media(max-width:600px){
+ .mosaic .mosaic-column{gap:92px}
+ .mosaic .tile-caption{top:calc(100% + 10px)}
+ .mosaic .tile-caption strong{font-size:19px}
+ .mosaic .tile-caption small{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.mosaic .tile-visual,.mosaic .tile-caption{transition:none}}
 </style>
 </head>
 <body>
 <header class="site-header"><a class="logo" href="#/" aria-label="ЯРД, главная">ЯРД</a><nav class="nav" aria-label="Главное меню"><a href="#/about" data-page="about">О нас</a><a href="#/projects" data-page="projects">Проекты</a><a href="#/contacts" data-page="contacts">Контакты</a></nav></header>
 <main id="app"></main>
 <footer class="footer"><span>© ЯРД · 2026</span><span>Архитектурное бюро · Москва</span></footer>
-<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Информация о cookie" hidden>Это тестовая версия сайта. Рекламные и аналитические cookie не используются. <a href="#/privacy">Подробнее</a><button class="cookie-close" type="button" aria-label="Закрыть уведомление"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>
-<div class="preview-tag">ЭСКИЗ · ПОРТФОЛИО ПОСТЕПЕННО ЗАПОЛНЯЕТСЯ</div>
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Информация о cookie" hidden>Для обеспечения работы сайта используются файлы cookie. <a href="#/privacy">Подробнее</a><button class="cookie-close" type="button" aria-label="Закрыть уведомление"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>
 <script>
 (function(){
 "use strict";
@@ -477,7 +503,7 @@ var sizes=["large","small","medium","small","large","medium","medium","large"];
 var columnCount=mosaicColumnCount();
 var columns=[];for(var c=0;c<columnCount;c++)columns.push([]);
 projects.forEach(function(p,i){columns[i%columnCount].push(p)});
-app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+projectCardFormat(p)+' size-'+sizes[index%sizes.length]+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+img(p.image,p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'<div class="tile-info"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></div></a>'}).join("")+'</div>'}).join("")+'</section>';
+app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic" aria-label="Все проекты">'+columns.map(function(items,col){return '<div class="mosaic-row mosaic-column">'+items.map(function(p){var index=p.id, position=columnCount===1?"left":(columnCount===2?["left","right"][col]:["left","center","right"][col]);return '<a class="tile format-'+projectCardFormat(p)+' size-'+sizes[index%sizes.length]+' align-'+position+'" href="#/projects/'+p.id+'" aria-label="'+p.name+', '+p.stage+', '+p.year+'">'+'<span class="tile-visual">'+img(p.image,p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+'</span><span class="tile-caption"><strong>'+p.name+'</strong><small>'+p.stage+' · '+p.year+'</small></span></a>'}).join("")+'</div>'}).join("")+'</section>';
 app.dataset.mosaicColumns=String(columnCount)
 }
 function oneProject(p){
