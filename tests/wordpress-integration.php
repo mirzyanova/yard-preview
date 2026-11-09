@@ -36,6 +36,18 @@ yard_assert(count($projects) === 2, 'Only the two real projects are imported');
 yard_assert(array_column($projects, 'id') === [0,1], 'Existing project URLs retain their IDs');
 yard_assert(count($projects[0]['gallery']) === 3 && count($projects[1]['gallery']) === 8, 'All 11 original photographs are in the media library');
 yard_assert($projects[0]['stage'] === 'Реализация' && $projects[0]['description'] === '', 'ERFURT preserves the source stage and leaves its missing description empty');
+yard_assert($projects[0]['pageImage'] === $projects[0]['gallery'][0], 'Existing projects use the first gallery image as the uncropped page hero');
+yard_assert(count($projects[0]['galleryItems']) === 3 && $projects[0]['galleryItems'][0]['size'] === 'large', 'Old projects default to full-width gallery images');
+update_post_meta($projects[0]['postId'], '_yard_gallery_sizes', wp_json_encode([
+    (string) yard_gallery_ids(get_post_meta($projects[0]['postId'], '_yard_gallery_ids', true))[0] => 'small',
+    (string) yard_gallery_ids(get_post_meta($projects[0]['postId'], '_yard_gallery_ids', true))[1] => 'medium',
+]));
+$sized_gallery = yard_public_projects()[0];
+yard_assert($sized_gallery['galleryItems'][0]['size'] === 'small' && $sized_gallery['galleryItems'][1]['size'] === 'medium' && $sized_gallery['galleryItems'][2]['size'] === 'large', 'Independent sizes propagate to each photo without changing the gallery order');
+update_post_meta($projects[0]['postId'], '_yard_page_image', (string) yard_gallery_ids(get_post_meta($projects[0]['postId'], '_yard_gallery_ids', true))[2]);
+yard_assert(yard_public_projects()[0]['pageImage'] === $projects[0]['gallery'][2], 'The page hero may be selected independently of the portfolio cover');
+update_post_meta($projects[0]['postId'], '_yard_page_image', '0');
+
 yard_assert($projects[0]['showOnHome'] && !$projects[1]['showOnHome'], 'Only a suitable horizontal hero is featured');
 yard_assert($projects[0]['cardSize'] === 'auto' && $projects[1]['cardSize'] === 'auto', 'Existing projects default to automatic card sizing');
 update_post_meta($projects[0]['postId'], '_yard_card_size', 'large');
@@ -52,6 +64,10 @@ yard_assert(str_contains($yard_editor_markup, 'name="yard_card_size"') && str_co
 yard_assert(str_contains($yard_editor_markup, 'name="yard_card_crop_x"') && str_contains($yard_editor_markup, 'name="yard_card_crop_y"'), 'Admin panel has separate controls for cover image crop');
 yard_assert(str_contains($yard_editor_markup, 'name="yard_intro"') && str_contains($yard_editor_markup, 'name="yard_description"'), 'Editor offers independent large intro and smaller description fields');
 yard_assert(str_contains($yard_editor_markup, 'Желаемый номер слайда') && str_contains($yard_editor_markup, 'Порядок в разделе'), 'Editor explains separate homepage and portfolio ordering');
+yard_assert(str_contains($yard_editor_markup, 'name="yard_page_image"'), 'Editor offers a separate lead image for the project page');
+yard_assert(str_contains($yard_editor_markup, 'name="yard_gallery_sizes"') && str_contains($yard_editor_markup, 'Малый — узлы') && str_contains($yard_editor_markup, 'Большой — по осям'), 'Editor displays three size choices for each gallery image');
+yard_assert(str_contains($yard_editor_markup, 'data-field="page_image"') && str_contains($yard_editor_markup, 'data-format="natural"'), 'Project main photo preview stays uncropped');
+
 yard_assert($projects[0]['intro'] === '' && $projects[0]['cardCropX'] === 50 && $projects[0]['cardCropY'] === 50, 'Legacy projects retain empty intro and central cover crop');
 update_post_meta($projects[0]['postId'], '_yard_card_crop_x', '80');
 update_post_meta($projects[0]['postId'], '_yard_card_crop_y', '130');
