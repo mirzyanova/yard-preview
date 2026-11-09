@@ -200,6 +200,28 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn('#app.home-rise-ready .home-scroll-rise:not(.is-visible)',html)
             self.assertTrue(deploy.validate_release(release))
 
+    def test_portfolio_labels_overlay_images_with_accessible_hover(self):
+        source=(ROOT/'index.html').read_text()
+        self.assertIn("'<span class=\"tile-visual\">'+cardImage(p)+'<span class=\"tile-caption\">",source)
+        self.assertIn('/* Hover-card presentation: text lives inside the photograph',source)
+        self.assertIn('.mosaic.yard-index .tile-visual::after{',source)
+        self.assertIn('linear-gradient(180deg,rgba(0,0,0,.30)',source)
+        self.assertIn('font-size:clamp(21px,1.74vw,25.5px)',source)
+        self.assertIn('.mosaic.yard-index .tile:hover .tile-visual::after',source)
+        self.assertIn('.mosaic.yard-index .tile:focus-visible .tile-visual::after',source)
+        self.assertIn('.mosaic.yard-index .tile:hover .tile-caption',source)
+        self.assertIn('.mosaic.yard-index .tile-caption{left:17px;right:17px;bottom:17px;',source)
+        self.assertIn('@media(hover:none)',source)
+        self.assertIn('@media(prefers-reduced-motion:reduce)',source)
+        with tempfile.TemporaryDirectory() as temp:
+            output=Path(temp)/'release'
+            build.build(output,'c'*40)
+            page=(output/'index.html').read_text()
+            self.assertIn("'<span class=\"tile-visual\">'+cardImage(p)+'<span class=\"tile-caption\">",page)
+            self.assertIn('font-size:clamp(21px,1.74vw,25.5px)',page)
+            self.assertIn('background:linear-gradient(180deg,transparent 38%',page)
+            self.assertTrue(deploy.validate_release(output))
+
     def test_real_projects_only_and_missing_data_remains_empty(self):
         projects=json.loads((ROOT/'cms/yard-projects/seed.json').read_text())['projects']
         self.assertEqual([len(p['photos']) for p in projects],[3,8])
