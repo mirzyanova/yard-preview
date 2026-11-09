@@ -35,12 +35,15 @@ var projects = yardPayload.projects.map(function (p, i) {
   if (!Number.isSafeInteger(p.id) || p.id < 0 || !Array.isArray(p.gallery) || !p.gallery.length) { throw new Error('Invalid project'); }
   return {
     id:p.id, name:yardEscape(p.name), year:yardEscape(p.year), stage:yardEscape(p.stage), location:yardEscape(p.location),
+    intro:yardEscape(p.intro).replace(/\r?\n/g,'<br>'),
     description:yardEscape(p.description).replace(/\r?\n/g,'<br>'), image:yardMediaUrl(p.image), gallery:p.gallery.map(yardMediaUrl),
     cardFormat:['horizontal','vertical','square'].includes(p.cardFormat) ? p.cardFormat : 'square',
     cardSize:['small','medium','large'].includes(p.cardSize) ? p.cardSize : 'auto',
     homeImage:p.homeImage ? yardMediaUrl(p.homeImage) : null, showOnHome:p.showOnHome === true,
     hasHorizontalHero:p.hasHorizontalHero === true,
-    homeCropX:yardCrop(p.homeCropX), homeCropY:yardCrop(p.homeCropY), homeOrder:Number(p.homeOrder) || 0, displayIndex:i
+    cardCropX:yardCrop(p.cardCropX), cardCropY:yardCrop(p.cardCropY),
+    homeCropX:yardCrop(p.homeCropX), homeCropY:yardCrop(p.homeCropY), homeOrder:Number(p.homeOrder) || 0,
+    order:Number(p.order) || 0, displayIndex:i
   };
 });
 function yardProjectMeta(p) { return [p.stage,p.year].filter(Boolean).join(' · '); }
