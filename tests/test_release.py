@@ -44,6 +44,23 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn('class="tile-visual"',production)
             self.assertIn('.mosaic{column-gap:clamp(26px,3.1vw,50px)}',production)
             self.assertNotIn('ЭСКИЗ · ПОРТФОЛИО',production)
+    def test_composition_and_size_api_cannot_overlap_captions(self):
+        source=(ROOT/'index.html').read_text()
+        self.assertIn('.mosaic .tile-caption{display:flex;position:static;',source)
+        self.assertIn('.mosaic .mosaic-column .tile{aspect-ratio:auto !important',source)
+        self.assertIn('.mosaic .tile.format-horizontal .tile-visual{aspect-ratio:1.56}',source)
+        self.assertIn('.mosaic .tile.format-vertical .tile-visual{aspect-ratio:.78}',source)
+        self.assertIn('function projectCardSize(p,index)',source)
+        self.assertIn("['small','medium','large']", (ROOT/'cms/client-boot.js').read_text())
+        self.assertIn("'cardSize' =>", (ROOT/'cms/yard-projects/yard-projects.php').read_text())
+        self.assertIn('name="yard_card_size"', (ROOT/'cms/yard-projects/yard-projects.php').read_text())
+        with tempfile.TemporaryDirectory() as temp:
+            target=Path(temp)/'release'
+            build.build(target,'c'*40)
+            final=(target/'index.html').read_text()
+            self.assertIn('function projectCardSize(p,index)',final)
+            self.assertIn('.mosaic .tile-caption{display:flex;position:static;',final)
+            self.assertIn("cardSize:['small','medium','large']",final)
     def test_real_projects_only_and_missing_data_remains_empty(self):
         projects=json.loads((ROOT/'cms/yard-projects/seed.json').read_text())['projects']
         self.assertEqual([len(p['photos']) for p in projects],[3,8])
