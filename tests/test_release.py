@@ -118,6 +118,27 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn('galleryItems:Array.isArray(p.galleryItems)',site)
             self.assertNotIn('bindSlideshow(app.querySelector(".gallery")',site)
             self.assertTrue(deploy.validate_release(release))
+    def test_annotated_gallery_composition_and_staggered_spacing(self):
+        source=(ROOT/'index.html').read_text()
+        self.assertIn('.mosaic.yard-index .mosaic-column{display:flex;flex-direction:column;gap:clamp(23px,1.6vw,29px)',source)
+        self.assertIn('@media(min-width:901px)',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column:nth-child(2) .tile:first-child .tile-visual{aspect-ratio:1.92}',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column:nth-child(3) .tile:first-child .tile-visual{aspect-ratio:1.24}',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column:nth-child(3){gap:clamp(35px,2.75vw,47px)}',source)
+        # Do not alter card sizing API, individual cropping or the outer alignment axes.
+        self.assertIn('projectCardSize(p,i)',source)
+        self.assertIn('cardImage(p)',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column:first-child .tile{align-self:flex-start!important}',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column:last-child .tile{align-self:flex-end!important}',source)
+        with tempfile.TemporaryDirectory() as temp:
+            output=Path(temp)/'release'
+            build.build(output,'a'*40)
+            page=(output/'index.html').read_text()
+            self.assertIn('aspect-ratio:1.92',page)
+            self.assertIn('aspect-ratio:1.24',page)
+            self.assertIn('gap:clamp(23px,1.6vw,29px)',page)
+            self.assertTrue(deploy.validate_release(output))
+
     def test_three_column_mosaic_and_frame_edge_arrows(self):
         source=(ROOT/'index.html').read_text()
         self.assertIn('class="mosaic yard-index"',source)

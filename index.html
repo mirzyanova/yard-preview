@@ -482,7 +482,14 @@
 /* Portfolio v3 — airy but coherent three-column editorial masonry.
    The first and last columns lock to the site's page axes. */
 .mosaic.yard-index{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start;column-gap:clamp(16px,1.75vw,30px);row-gap:0;width:calc(100% - 2 * var(--page));max-width:none;margin:0 var(--page);padding-bottom:clamp(105px,10vw,165px)}
-.mosaic.yard-index .mosaic-column{display:flex;flex-direction:column;gap:clamp(44px,4.3vw,68px);min-width:0;align-items:stretch}
+.mosaic.yard-index .mosaic-column{display:flex;flex-direction:column;gap:clamp(23px,1.6vw,29px);min-width:0;align-items:stretch}
+/* Screenshot-matched first-row rhythm: the central plan is panoramic, the right
+   landscape frame is a calm near-square. The original images are never modified. */
+@media(min-width:901px){
+ .mosaic.yard-index .mosaic-column:nth-child(2) .tile:first-child .tile-visual{aspect-ratio:1.92}
+ .mosaic.yard-index .mosaic-column:nth-child(3) .tile:first-child .tile-visual{aspect-ratio:1.24}
+ .mosaic.yard-index .mosaic-column:nth-child(3){gap:clamp(35px,2.75vw,47px)}
+}
 .mosaic.yard-index .tile{display:block;position:relative;grid-column:auto;flex:0 0 auto;align-self:center;justify-self:auto!important;width:100%;min-width:0;aspect-ratio:auto!important;background:#fff;overflow:visible;box-shadow:none}
 .mosaic.yard-index .tile.size-small{width:82%!important}
 .mosaic.yard-index .tile.size-medium{width:94%!important}
