@@ -42,7 +42,7 @@ class DeploymentBoundaryTests(unittest.TestCase):
             production=(target/'index.html').read_text()
             self.assertIn('class="tile-caption"',production)
             self.assertIn('class="tile-visual"',production)
-            self.assertIn('.mosaic{column-gap:clamp(26px,3.1vw,50px)}',production)
+            self.assertIn('.mosaic{column-gap:clamp(28px,3.1vw,52px);padding-bottom:clamp(105px,10vw,165px)}',production)
             self.assertNotIn('ЭСКИЗ · ПОРТФОЛИО',production)
     def test_composition_and_size_api_cannot_overlap_captions(self):
         source=(ROOT/'index.html').read_text()
