@@ -2,13 +2,13 @@
 /**
  * Plugin Name: ЯРД — управление проектами
  * Description: Проекты, фотографии и API для существующего сайта ЯРД. Не устанавливает тему.
- * Version: 1.0.0
+ * Version: 1.0.2
  * Requires at least: 6.7
  * Requires PHP: 8.2
  */
 defined('ABSPATH') || exit;
 
-const YARD_PROJECTS_VERSION = '1.0.1';
+const YARD_PROJECTS_VERSION = '1.0.2';
 
 function yard_project_caps(): array {
     return array_fill_keys([
@@ -52,7 +52,7 @@ add_action('init', function (): void {
     add_theme_support('post-thumbnails');
     add_image_size('yard_card', 1200, 1600, false);
     add_image_size('yard_large', 2400, 2400, false);
-    foreach (['year', 'stage', 'location', 'card_format', 'gallery_ids', 'home_image', 'home_crop_x', 'home_crop_y', 'show_home', 'home_order'] as $field) {
+    foreach (['year', 'stage', 'location', 'card_format', 'card_size', 'gallery_ids', 'home_image', 'home_crop_x', 'home_crop_y', 'show_home', 'home_order'] as $field) {
         register_post_meta('yard_project', '_yard_' . $field, [
             'single' => true, 'type' => 'string', 'show_in_rest' => false, 'revisions_enabled' => true,
             'auth_callback' => function ($allowed, $key, $post_id): bool { return current_user_can('edit_post', (int) $post_id); },
@@ -131,7 +131,12 @@ function yard_project_box(WP_Post $post): void {
     foreach (['auto' => 'По пропорциям фотографии', 'horizontal' => 'Горизонтальная', 'vertical' => 'Вертикальная', 'square' => 'Квадратная'] as $key => $label) {
         echo '<option value="' . esc_attr($key) . '"' . selected($v('card_format') ?: 'auto', $key, false) . '>' . esc_html($label) . '</option>';
     }
-    echo '</select></label></div><hr>';
+    echo '</select></label>';
+    echo '<label>Визуальный приоритет / размер карточки<select name="yard_card_size">';
+    foreach (['auto' => 'Автоматически — по композиции', 'small' => 'Маленькая', 'medium' => 'Средняя', 'large' => 'Большая'] as $key => $label) {
+        echo '<option value="' . esc_attr($key) . '"' . selected($v('card_size') ?: 'auto', $key, false) . '>' . esc_html($label) . '</option>';
+    }
+    echo '</select><span class="description">Меняет только ширину плитки в разделе «Проекты». При выборе «Автоматически» сайт чередует размеры для гармоничной композиции.</span></label></div><hr>';
     yard_media_control('cover', 'Основная фотография карточки', get_post_thumbnail_id($post->ID));
     yard_media_control('home_image', 'Фотография для главной', absint($v('home_image')));
     echo '<p><label><input type="checkbox" name="yard_show_home" value="1"' . checked($v('show_home'), '1', false) . '> Показывать в слайдшоу на главной</label></p>';
@@ -172,6 +177,8 @@ add_action('save_post_yard_project', function ($id): void {
     foreach (['stage', 'location'] as $key) { update_post_meta($id, '_yard_' . $key, mb_substr($read($key), 0, 180)); }
     $format = $read('card_format');
     update_post_meta($id, '_yard_card_format', in_array($format, ['auto', 'horizontal', 'vertical', 'square'], true) ? $format : 'auto');
+    $card_size = $read('card_size');
+    update_post_meta($id, '_yard_card_size', in_array($card_size, ['auto', 'small', 'medium', 'large'], true) ? $card_size : 'auto');
     $cover = yard_image_id($read('cover'));
     if ($cover) { set_post_thumbnail($id, $cover); } else { delete_post_thumbnail($id); }
     $gallery = yard_gallery_ids($read('gallery_ids'));
@@ -215,7 +222,7 @@ function yard_public_projects(): array {
             'name' => get_the_title($id), 'year' => $get('year'), 'stage' => $get('stage'), 'location' => $get('location'),
             'description' => trim(wp_strip_all_tags(strip_shortcodes($post->post_content))),
             'image' => $cover['url'], 'cover' => $cover, 'gallery' => array_column($gallery, 'url'), 'galleryMedia' => $gallery,
-            'cardFormat' => $format, 'homeImage' => $home['url'] ?? null,
+            'cardFormat' => $format, 'cardSize' => in_array($get('card_size'), ['small', 'medium', 'large'], true) ? $get('card_size') : 'auto', 'homeImage' => $home['url'] ?? null,
             'showOnHome' => $get('show_home') === '1' && $home !== null, 'hasHorizontalHero' => $home !== null,
             'homeCropX' => yard_crop_position($get('home_crop_x')), 'homeCropY' => yard_crop_position($get('home_crop_y')),
             'homeOrder' => (int) $get('home_order'), 'order' => (int) $post->menu_order,
@@ -234,10 +241,14 @@ add_action('rest_api_init', function (): void {
     ]);
 });
 add_filter('manage_yard_project_posts_columns', function ($columns) {
-    return ['cb' => $columns['cb'], 'title' => 'Название', 'yard_year' => 'Год', 'yard_stage' => 'Стадия', 'yard_location' => 'Локация', 'yard_order' => 'Порядок', 'yard_home' => 'На главной', 'date' => 'Публикация'];
+    return ['cb' => $columns['cb'], 'title' => 'Название', 'yard_year' => 'Год', 'yard_stage' => 'Стадия', 'yard_location' => 'Локация', 'yard_order' => 'Порядок', 'yard_size' => 'Размер', 'yard_home' => 'На главной', 'date' => 'Публикация'];
 });
 add_action('manage_yard_project_posts_custom_column', function ($column, $id): void {
     if ($column === 'yard_order') { echo (int) get_post($id)->menu_order; }
+    elseif ($column === 'yard_size') {
+        $value = get_post_meta($id, '_yard_card_size', true);
+        echo esc_html(['small' => 'Маленькая', 'medium' => 'Средняя', 'large' => 'Большая'][$value] ?? 'Автоматически');
+    }
     elseif ($column === 'yard_home') { echo get_post_meta($id, '_yard_show_home', true) === '1' ? 'Да' : 'Нет'; }
     elseif (in_array($column, ['yard_year', 'yard_stage', 'yard_location'], true)) { echo esc_html(get_post_meta($id, '_' . $column, true)); }
 }, 10, 2);
