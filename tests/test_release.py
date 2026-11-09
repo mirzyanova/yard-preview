@@ -139,6 +139,37 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn('gap:clamp(82px,6vw,104px)',page)
             self.assertTrue(deploy.validate_release(output))
 
+    def test_portfolio_shrinks_three_percent_and_skips_initial_viewport_animation(self):
+        source=(ROOT/'index.html').read_text()
+        # Size is reduced within each column; the site and extreme alignment axes do not move.
+        self.assertIn('.mosaic.yard-index .tile.size-large{width:97%!important}',source)
+        self.assertIn('.mosaic.yard-index .tile.size-medium{width:91.2%!important}',source)
+        self.assertIn('.mosaic.yard-index .tile.size-small{width:79.5%!important}',source)
+        self.assertIn('.mosaic.yard-index .tile.size-small{width:84.4%!important}',source)
+        self.assertIn('.mosaic.yard-index .tile.size-medium{width:93.1%!important}',source)
+        self.assertIn('.mosaic.yard-index .tile.size-small{width:87.3%!important}',source)
+        self.assertIn('.mosaic.yard-index .tile.size-medium{width:94.1%!important}',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column:first-child .tile{align-self:flex-start!important}',source)
+        self.assertIn('.mosaic.yard-index .mosaic-column:last-child .tile{align-self:flex-end!important}',source)
+        reveal=source[source.index('function bindPortfolioScrollRise()'):source.index('function allProjects(view)')]
+        # Seed the visible first screen before enabling CSS that hides unrevealed tiles.
+        self.assertIn('requestAnimationFrame(function(){',reveal)
+        self.assertIn('var viewportBottom=window.innerHeight||document.documentElement.clientHeight;',reveal)
+        self.assertIn('if(tile.getBoundingClientRect().top<viewportBottom)',reveal)
+        self.assertLess(reveal.index('tile.classList.add("is-revealed")'),reveal.index('app.classList.add("portfolio-rise-ready")'))
+        self.assertIn('if(!tile.classList.contains("is-revealed"))observer.observe(tile)',reveal)
+        self.assertIn('portfolioRevealGeneration',reveal)
+        self.assertIn('observer.unobserve(entry.target)',reveal)
+        self.assertIn('function route(){portfolioRevealGeneration++;',source)
+        with tempfile.TemporaryDirectory() as temp:
+            output=Path(temp)/'release'
+            build.build(output,'1'*40)
+            page=(output/'index.html').read_text()
+            self.assertIn('var viewportBottom=window.innerHeight||document.documentElement.clientHeight;',page)
+            self.assertIn('.mosaic.yard-index .tile.size-large{width:97%!important}',page)
+            self.assertIn('app.classList.add("portfolio-rise-ready")',page)
+            self.assertTrue(deploy.validate_release(output))
+
     def test_portfolio_cards_reveal_with_restored_spacing(self):
         source=(ROOT/'index.html').read_text()
         self.assertIn('gap:clamp(82px,6vw,104px)',source)
@@ -178,9 +209,9 @@ class DeploymentBoundaryTests(unittest.TestCase):
         self.assertIn('column-gap:clamp(16px,1.75vw,30px)',source)
         self.assertIn('.mosaic.yard-index .mosaic-column:first-child .tile{align-self:flex-start!',source)
         self.assertIn('.mosaic.yard-index .mosaic-column:last-child .tile{align-self:flex-end!',source)
-        self.assertIn('.mosaic.yard-index .tile.size-small{width:82%',source)
-        self.assertIn('.mosaic.yard-index .tile.size-medium{width:94%',source)
-        self.assertIn('.mosaic.yard-index .tile.size-large{width:100%',source)
+        self.assertIn('.mosaic.yard-index .tile.size-small{width:79.5%',source)
+        self.assertIn('.mosaic.yard-index .tile.size-medium{width:91.2%',source)
+        self.assertIn('.mosaic.yard-index .tile.size-large{width:97%',source)
         self.assertIn('function projectGalleryItems(p)',source)
         self.assertIn('.project-gallery-stage .project-gallery-arrow{position:absolute;top:0;bottom:0;transform:none;width:25%',source)
         self.assertIn('.project-gallery-stage .project-gallery-arrow:hover',source)
