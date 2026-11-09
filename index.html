@@ -551,6 +551,46 @@
 @media(prefers-reduced-motion:reduce){
  #app .home-scroll-rise{opacity:1!important;transform:none!important;transition:none!important}
 }
+/* Hover-card presentation: text lives inside the photograph, not below it.
+   The dark gradient guarantees white title contrast on both light and dark photos. */
+.mosaic.yard-index .tile-visual{isolation:isolate}
+.mosaic.yard-index .tile-visual::after{
+ content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+ background:linear-gradient(180deg,rgba(0,0,0,.30) 0%,rgba(0,0,0,.38) 57%,rgba(0,0,0,.60) 100%);
+ opacity:0;transition:opacity .36s ease;
+}
+.mosaic.yard-index .tile-caption{
+ position:absolute;left:clamp(16px,1.7vw,26px);right:clamp(16px,1.7vw,26px);bottom:clamp(15px,1.7vw,26px);
+ z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+ width:auto;min-height:0;padding:0;margin:0;color:#fff;text-align:left;
+ opacity:0;transform:translateY(9px);transition:opacity .3s ease,transform .36s cubic-bezier(.2,.65,.22,1);
+ pointer-events:none;
+}
+.mosaic.yard-index .tile-caption strong{
+ color:#fff;font-family:"Sitka Text",Cambria,Georgia,serif;
+ font-size:clamp(21px,1.74vw,25.5px);font-weight:400;line-height:1.2;
+ letter-spacing:-.014em;max-width:100%;overflow-wrap:break-word;
+}
+.mosaic.yard-index .tile-caption small{color:rgba(255,255,255,.9);font-size:12px;line-height:1.4}
+.mosaic.yard-index .tile:hover .tile-visual,.mosaic.yard-index .tile:focus-visible .tile-visual{transform:scale(1.025)}
+.mosaic.yard-index .tile:hover .tile-visual::after,.mosaic.yard-index .tile:focus-visible .tile-visual::after{opacity:1}
+.mosaic.yard-index .tile:hover .tile-caption,.mosaic.yard-index .tile:focus-visible .tile-caption{opacity:1;transform:translateY(0)}
+@media(hover:none){
+ .mosaic.yard-index .tile-visual::after{
+   background:linear-gradient(180deg,transparent 38%,rgba(0,0,0,.10) 60%,rgba(0,0,0,.58) 100%);
+   opacity:1;
+ }
+ .mosaic.yard-index .tile-caption{opacity:1;transform:none}
+ .mosaic.yard-index .tile:hover .tile-visual{transform:none}
+}
+@media(max-width:600px){
+ .mosaic.yard-index .tile-caption{left:17px;right:17px;bottom:17px;padding:0;min-height:0}
+ .mosaic.yard-index .tile-caption strong{font-size:24px;line-height:1.2}
+ .mosaic.yard-index .tile-caption small{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mosaic.yard-index .tile-visual::after,.mosaic.yard-index .tile-caption{transition:none}
+}
 </style>
 </head>
 <body>
@@ -709,7 +749,7 @@ var align=columnCount===1?'center':(col===0?'left':(col===columnCount-1?'right':
 var size=projectCardSize(p,i),format=projectCardFormat(p);
 var meta=[p.stage,p.year].filter(Boolean).join(' · ');
 return '<a class="tile format-'+format+' size-'+size+' align-'+align+'" href="#/projects/'+p.id+'" aria-label="'+p.name+(meta?', '+meta:'')+'">'+
-'<span class="tile-visual">'+cardImage(p)+'</span><span class="tile-caption"><strong>'+p.name+'</strong>'+(meta?'<small>'+meta+'</small>':'')+'</span></a>'
+'<span class="tile-visual">'+cardImage(p)+'<span class="tile-caption"><strong>'+p.name+'</strong>'+(meta?'<small>'+meta+'</small>':'')+'</span></span></a>'
 }).join('')+'</div>'
 }).join('');
 app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic yard-index" aria-label="Все проекты">'+markup+'</section>';
