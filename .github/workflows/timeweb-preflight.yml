@@ -1,0 +1,19 @@
+name: Verify exact Timeweb copy
+on:
+  workflow_dispatch:
+  push:
+    branches: [timeweb-migration]
+    paths:
+      - scripts/check_timeweb.py
+      - .github/workflows/timeweb-preflight.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - run: python3 scripts/check_timeweb.py

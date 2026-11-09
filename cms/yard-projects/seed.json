@@ -1,0 +1,74 @@
+{
+  "projects": [
+    {
+      "key": "erfurt",
+      "legacyId": 0,
+      "name": "Арт-объект ERFURT на бульваре ЗИЛАРТ",
+      "year": "2024",
+      "stage": "Реализация",
+      "location": "Москва, Россия",
+      "order": 0,
+      "cardFormat": "horizontal",
+      "showOnHome": true,
+      "photos": [
+        {
+          "path": "erfurt-01.webp",
+          "sha256": "2752eac41ce0b4e63c2da3eaf33f2a9554909f9814a33084dc7fe1131c9cd4e0"
+        },
+        {
+          "path": "erfurt-02.webp",
+          "sha256": "b9ea0eefbef55480a619f57f3b4465c1a0d42e03436638f82ad2725ae38c59e7"
+        },
+        {
+          "path": "erfurt-03.webp",
+          "sha256": "d9fed6adfcea0474f4fb720727632d3e832027af32487755a187db7d3c8c8a16"
+        }
+      ]
+    },
+    {
+      "key": "forum",
+      "legacyId": 1,
+      "name": "Клубный дом Форум",
+      "year": "2025",
+      "stage": "Реализация",
+      "location": "Москва, Россия",
+      "order": 1,
+      "cardFormat": "vertical",
+      "showOnHome": false,
+      "photos": [
+        {
+          "path": "assets/projects/forum/forum-01.webp",
+          "sha256": "2a49e168db80878f346933a9c6875c2218f359a93e2ab39d14ed5456e22bf2ad"
+        },
+        {
+          "path": "assets/projects/forum/forum-02.webp",
+          "sha256": "b4901a0bdc1cff619711c7a142d9ad191a40002589c0f9fe60672b36fbf2a6f5"
+        },
+        {
+          "path": "assets/projects/forum/forum-03.webp",
+          "sha256": "c1edeb0dcdd728aa5e0fae31ebec5e09d08b3542b0a1ad4ff47a53182717ec32"
+        },
+        {
+          "path": "assets/projects/forum/forum-04.webp",
+          "sha256": "3ee6ba3ca130c4c75d8969868f41d7e432e95a8b86efb8bae9ab7d52ab63a6d2"
+        },
+        {
+          "path": "assets/projects/forum/forum-05.webp",
+          "sha256": "f70f4e8e30330693ad89b72c7b772109345504d6779e10b50becb20905ae5a3d"
+        },
+        {
+          "path": "assets/projects/forum/forum-06.webp",
+          "sha256": "b50d1ede113c5fa803f2e8db11f7664b08f2667245fa940240a316241dce0bfd"
+        },
+        {
+          "path": "assets/projects/forum/forum-07.webp",
+          "sha256": "1708e221cd2d73428222c18a049e70fd950830d2aa944563f371209d1ea01edf"
+        },
+        {
+          "path": "assets/projects/forum/forum-08.webp",
+          "sha256": "ddee009d530d513f7c57e33fedb3438e2ef33621b4ed078aa050879f35c954a3"
+        }
+      ]
+    }
+  ]
+}
