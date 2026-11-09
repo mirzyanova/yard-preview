@@ -490,10 +490,10 @@
  .mosaic.yard-index .mosaic-column:nth-child(3) .tile:first-child .tile-visual{aspect-ratio:1.24}
  .mosaic.yard-index .mosaic-column:nth-child(3){gap:clamp(94px,7.3vw,115px)}
 }
-.mosaic.yard-index .tile{display:block;position:relative;grid-column:auto;flex:0 0 auto;align-self:center;justify-self:auto!important;width:100%;min-width:0;aspect-ratio:auto!important;background:#fff;overflow:visible;box-shadow:none}
-.mosaic.yard-index .tile.size-small{width:82%!important}
-.mosaic.yard-index .tile.size-medium{width:94%!important}
-.mosaic.yard-index .tile.size-large{width:100%!important}
+.mosaic.yard-index .tile{display:block;position:relative;grid-column:auto;flex:0 0 auto;align-self:center;justify-self:auto!important;width:97%;min-width:0;aspect-ratio:auto!important;background:#fff;overflow:visible;box-shadow:none}
+.mosaic.yard-index .tile.size-small{width:79.5%!important}
+.mosaic.yard-index .tile.size-medium{width:91.2%!important}
+.mosaic.yard-index .tile.size-large{width:97%!important}
 .mosaic.yard-index .mosaic-column:first-child .tile{align-self:flex-start!important}
 .mosaic.yard-index .mosaic-column:last-child .tile{align-self:flex-end!important}
 .mosaic.yard-index .mosaic-column:nth-child(2) .tile{align-self:center!important}
@@ -512,15 +512,15 @@
  .mosaic.yard-index{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:clamp(16px,2.6vw,24px)}
  .mosaic.yard-index .mosaic-column{gap:clamp(88px,9vw,110px)}
  .mosaic.yard-index .mosaic-column:nth-child(2) .tile{align-self:flex-end!important}
- .mosaic.yard-index .tile.size-small{width:87%!important}
- .mosaic.yard-index .tile.size-medium{width:96%!important}
+ .mosaic.yard-index .tile.size-small{width:84.4%!important}
+ .mosaic.yard-index .tile.size-medium{width:93.1%!important}
 }
 @media(max-width:600px){
  .mosaic.yard-index{grid-template-columns:minmax(0,1fr);column-gap:0}
  .mosaic.yard-index .mosaic-column{gap:96px}
  .mosaic.yard-index .mosaic-column:first-child .tile,.mosaic.yard-index .mosaic-column:last-child .tile,.mosaic.yard-index .mosaic-column:nth-child(2) .tile{align-self:center!important}
- .mosaic.yard-index .tile.size-small{width:90%!important}
- .mosaic.yard-index .tile.size-medium{width:97%!important}
+ .mosaic.yard-index .tile.size-small{width:87.3%!important}
+ .mosaic.yard-index .tile.size-medium{width:94.1%!important}
  .mosaic.yard-index .tile-caption{min-height:58px;padding-top:10px}
  .mosaic.yard-index .tile-caption strong{font-size:16px}
 }
@@ -650,7 +650,7 @@ function projectDetail(p){
 var intro=p.intro||'',body=p.description||'';
 return intro||body?'<div class="project-story-description"><h2 class="project-story-label">О ПРОЕКТЕ</h2><div class="detail-copy">'+(intro?'<p class="detail-intro">'+intro+'</p>':'')+(body?'<p class="detail-body">'+body+'</p>':'')+'</div></div>':''
 }
-var app=document.getElementById("app"), timer=null, clearEvents=function(){}, projectView="grid", portfolioRevealObserver=null;
+var app=document.getElementById("app"), timer=null, clearEvents=function(){}, projectView="grid", portfolioRevealObserver=null, portfolioRevealGeneration=0;
 function page(id){window.location.hash="#/"+id}
 function img(url,alt){var missing=url.indexOf("erfurt-")===0?' onerror="this.onerror=null;this.src=\'assets/erfurt-photo-pending.svg\'"':'';return '<img src="'+url+'" alt="'+alt+'" loading="lazy"'+missing+'>'}
 function iconSvg(kind,cssClass){
@@ -751,15 +751,25 @@ function mosaicColumnCount(){return window.innerWidth<=600?1:(window.innerWidth<
 /* Portfolio scroll entrance follows the same IntersectionObserver approach as the
    homepage blocks, but observes individual project cards so later uploads reveal
    naturally as the visitor reaches them. Hover zoom remains independent. */
+/* On arrival the first viewport is already complete. Only cards below it
+   rise into view as the visitor scrolls, including new WordPress projects. */
 function bindPortfolioScrollRise(){
 if(portfolioRevealObserver){portfolioRevealObserver.disconnect();portfolioRevealObserver=null}
+var generation=++portfolioRevealGeneration;
 var tiles=Array.from(app.querySelectorAll(".yard-index .tile"));
-if(!tiles.length)return;
-if(!("IntersectionObserver" in window)||window.matchMedia("(prefers-reduced-motion: reduce)").matches){
 app.classList.remove("portfolio-rise-ready");
-return
+if(!tiles.length)return;
+if(!("IntersectionObserver" in window)||window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+requestAnimationFrame(function(){
+if(generation!==portfolioRevealGeneration||!app.querySelector(".yard-index"))return;
+/* Route resets scroll to the top synchronously; measure the initial viewport
+   after that reset, before ever enabling the hidden-state CSS. */
+var viewportBottom=window.innerHeight||document.documentElement.clientHeight;
+tiles.forEach(function(tile){
+if(tile.getBoundingClientRect().top<viewportBottom){
+tile.classList.add("is-revealed")
 }
-app.classList.add("portfolio-rise-ready");
+});
 var observer=new IntersectionObserver(function(entries){
 entries.forEach(function(entry){
 if(entry.isIntersecting){
@@ -769,7 +779,11 @@ observer.unobserve(entry.target)
 })
 },{threshold:0.12,rootMargin:"0px 0px -7% 0px"});
 portfolioRevealObserver=observer;
-tiles.forEach(function(tile){observer.observe(tile)})
+app.classList.add("portfolio-rise-ready");
+tiles.forEach(function(tile){
+if(!tile.classList.contains("is-revealed"))observer.observe(tile)
+})
+})
 }
 function allProjects(view){
 projectView=view||projectView;
@@ -905,7 +919,7 @@ app.innerHTML='<section class="contacts"><div class="contacts-heading"><h1>Ко�
 '<p class="contact-form-status" role="status" aria-live="polite"></p></form></section></section>';
 bindContactForm();
 }
-function route(){if(portfolioRevealObserver){portfolioRevealObserver.disconnect();portfolioRevealObserver=null}app.classList.remove("portfolio-rise-ready");clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"||r.indexOf("/projects?")===0){var selectedView=/[?&]view=list(?:&|$)/.test(r)?"list":(/[?&]view=grid(?:&|$)/.test(r)?"grid":projectView);allProjects(selectedView)}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
+function route(){portfolioRevealGeneration++;if(portfolioRevealObserver){portfolioRevealObserver.disconnect();portfolioRevealObserver=null}app.classList.remove("portfolio-rise-ready");clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);if(r==="/"||r==="/about"){home()}else if(r==="/projects"||r.indexOf("/projects?")===0){var selectedView=/[?&]view=list(?:&|$)/.test(r)?"list":(/[?&]view=grid(?:&|$)/.test(r)?"grid":projectView);allProjects(selectedView)}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0)}
 window.addEventListener("resize",function(){var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";if((r==="/projects"||r.indexOf("/projects?")===0)&&projectView==="grid"&&app.dataset.mosaicColumns!==String(mosaicColumnCount()))allProjects("grid")});
 window.addEventListener("hashchange",route);route();
 var cb=document.getElementById("cookieBanner");
