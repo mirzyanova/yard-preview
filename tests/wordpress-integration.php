@@ -42,7 +42,11 @@ yard_assert(count(yard_public_projects()) === 2 && count(get_posts(['post_type'=
 $forum_id = $projects[1]['postId'];
 $forum_images = yard_gallery_ids(get_post_meta($forum_id, '_yard_gallery_ids', true));
 update_post_meta($forum_id, '_yard_home_image', (string) $forum_images[0]); update_post_meta($forum_id, '_yard_show_home', '1');
-yard_assert(!yard_public_projects()[1]['showOnHome'], 'A vertical photo cannot enter the homepage slideshow');
+update_post_meta($forum_id, '_yard_home_crop_x', '120');
+update_post_meta($forum_id, '_yard_home_crop_y', '30');
+$cropped = yard_public_projects()[1];
+yard_assert($cropped['showOnHome'] && $cropped['homeImage'] === yard_media($forum_images[0])['url'], 'A vertical photo can be featured');
+yard_assert($cropped['homeCropX'] === 100 && $cropped['homeCropY'] === 30 && $projects[0]['homeCropX'] === 50, 'Crop coordinates are bounded and default to the center');
 update_post_meta($forum_id, '_yard_gallery_ids', implode(',', array_reverse($forum_images)));
 yard_assert(yard_public_projects()[1]['gallery'][0] === yard_media($forum_images[7])['url'], 'Gallery ordering is reflected in the API');
 wp_update_post(['ID'=>$forum_id,'post_status'=>'draft']);
