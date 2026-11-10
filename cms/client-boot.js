@@ -9,6 +9,25 @@ function yardMediaUrl(value) {
   if (url.origin !== location.origin || !url.pathname.startsWith('/cms/wp-content/uploads/') || url.search || url.hash) { throw new Error('Invalid media URL'); }
   return url.href.replace(/&/g, '%26').replace(/"/g, '%22').replace(/'/g, '%27');
 }
+/* WordPress already returns responsive variants for cover/gallery media. Reuse
+   them for a chosen homepage image when it is the same attachment. */
+function yardSafeSrcset(value) {
+  if (typeof value !== 'string' || !value.trim()) { return ''; }
+  return value.split(',').slice(0, 30).map(function (candidate) {
+    var match = candidate.trim().match(/^(\S+)\s+([1-9]\d{1,4})w$/);
+    if (!match) { return ''; }
+    try { return yardMediaUrl(match[1]) + ' ' + match[2] + 'w'; }
+    catch (error) { return ''; }
+  }).filter(Boolean).join(', ');
+}
+function yardHomeSrcset(p) {
+  if (!p.homeImage) { return ''; }
+  if (p.homeSrcset) { return yardSafeSrcset(p.homeSrcset); }
+  var media = (Array.isArray(p.galleryMedia) ? p.galleryMedia : []).slice();
+  if (p.cover) { media.push(p.cover); }
+  var match = media.find(function (item) { return item && item.url === p.homeImage; });
+  return match ? yardSafeSrcset(match.srcset) : '';
+}
 async function yardRequest(path, options) {
   var controller = new AbortController();
   var timeout = setTimeout(function () { controller.abort(); }, 15000);
@@ -43,7 +62,7 @@ var projects = yardPayload.projects.map(function (p, i) {
     }):p.gallery.map(function(url){return {url:yardMediaUrl(url),size:'large'}}),
     cardFormat:['horizontal','vertical','square'].includes(p.cardFormat) ? p.cardFormat : 'square',
     cardSize:['small','medium','large'].includes(p.cardSize) ? p.cardSize : 'auto',
-    homeImage:p.homeImage ? yardMediaUrl(p.homeImage) : null, showOnHome:p.showOnHome === true,
+    homeImage:p.homeImage ? yardMediaUrl(p.homeImage) : null, homeSrcset:yardHomeSrcset(p), showOnHome:p.showOnHome === true,
     hasHorizontalHero:p.hasHorizontalHero === true,
     cardCropX:yardCrop(p.cardCropX), cardCropY:yardCrop(p.cardCropY),
     homeCropX:yardCrop(p.homeCropX), homeCropY:yardCrop(p.homeCropY), homeOrder:Number(p.homeOrder) || 0,
