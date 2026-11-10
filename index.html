@@ -927,19 +927,33 @@ body:not(.yard-home-route) #app{padding-top:82px}
 @media(prefers-reduced-motion:reduce){
  .project-gallery-slide,.project-gallery-slide.is-animating{transition:none!important}
 }
-/* Metadata precedes the copy; the copy begins exactly at the label
-   column's left edge, rather than in a separate right-hand column. */
+/* Project facts and description share one top baseline, as two columns.
+   Both outer edges follow the site's page rails. On mobile the text stacks. */
 .project-page .project-story{
- display:flex;flex-direction:column;align-items:stretch;
- gap:clamp(55px,6vw,96px);
+ display:grid;
+ grid-template-columns:minmax(0,30%) minmax(0,1fr);
+ align-items:start;
+ column-gap:clamp(35px,4.7vw,70px);
+ row-gap:0;
+ width:100%;max-width:none;
+ margin:0;
 }
-.project-story-description{align-self:flex-start;width:100%;max-width:100%}
-.project-story-description .detail-copy{max-width:900px}
+.project-page .project-story-facts{grid-column:1;min-width:0}
+.project-page .project-story-description{
+ grid-column:2;align-self:start;
+ min-width:0;width:100%;max-width:100%;
+}
+.project-page .project-story-description .detail-copy{width:100%;max-width:none}
 @media(max-width:900px){
- .project-page .project-story{gap:clamp(48px,7vw,76px)}
+ .project-page .project-story{
+  grid-template-columns:minmax(0,31%) minmax(0,1fr);
+  column-gap:clamp(24px,3.5vw,45px);
+ }
 }
 @media(max-width:600px){
- .project-page .project-story{gap:clamp(43px,9vw,65px)}
+ .project-page .project-story{grid-template-columns:1fr;row-gap:clamp(43px,9vw,65px)}
+ .project-page .project-story-facts,
+ .project-page .project-story-description{grid-column:1}
 }
 
 </style>
