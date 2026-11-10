@@ -738,6 +738,111 @@ body:not(.yard-home-route) #app{padding-top:82px}
  .home-featured-image img,.home-featured-image:after,.home-featured-caption{transition:none}
 }
 
+
+
+/* 2026-11-10: West 8-inspired horizontal slide and binary header contrast.
+   Only solid black/white text is used; never multiply/difference grey. */
+.site-header{mix-blend-mode:normal;color:#111;transition:color .14s ease}
+.site-header .logo,.site-header .nav a{color:inherit}
+.site-header .nav a{transition:color .14s ease}
+.yard-home-route:not(.header-below-hero) .site-header .logo{
+ opacity:0;visibility:hidden;pointer-events:none;
+}
+.site-header .logo{transition:opacity .25s ease,visibility .25s ease}
+.yard-home-hero.hero{cursor:auto}
+.yard-home-hero .hero-slide,.yard-home-hero .hero-slide.active{
+ opacity:1;transform:translate3d(100%,0,0);visibility:hidden;pointer-events:none;transition:none;
+ will-change:transform;
+}
+.yard-home-hero .hero-slide.active{transform:translate3d(0,0,0);visibility:visible}
+.yard-home-hero .hero-slide.from-left{transform:translate3d(-100%,0,0);visibility:visible}
+.yard-home-hero .hero-slide.from-right{transform:translate3d(100%,0,0);visibility:visible}
+.yard-home-hero .hero-slide.is-exiting{visibility:visible;pointer-events:none}
+.yard-home-hero .hero-slide.is-animating{transition:transform .9s cubic-bezier(.76,0,.24,1)}
+/* Original photography stays untouched; no black gradient over the slide. */
+.yard-home-hero .hero-slide:after{background:none}
+.yard-home-hero .hero-slide img{will-change:transform}
+/* Project caption is triggered by hovering over the bottom quarter only. */
+.yard-home-hero .hero-caption{
+ bottom:clamp(18px,2.35vw,34px);z-index:9;
+ opacity:0;pointer-events:none;transition:opacity .22s ease;
+ text-shadow:0 1px 5px rgba(0,0,0,.14);
+}
+.yard-home-hero.show-caption .hero-slide.active .hero-caption{opacity:1;pointer-events:auto}
+.yard-home-hero .hero-caption a{font-size:clamp(16px,1.38vw,21px)}
+.yard-home-hero .hero-caption span{font-size:11px}
+.yard-home-hero .hero-slide .hero-caption{opacity:0}
+.yard-home-hero .counter{bottom:clamp(18px,2.35vw,34px)}
+/* Two invisible navigation halves. The arrow itself tracks the pointer. */
+.yard-home-hero .control-zone{position:absolute;inset:0;z-index:5;pointer-events:none;padding:0}
+.yard-home-hero .control-zone .arrow-zone{
+ position:absolute;top:0;bottom:0;width:50%;height:100%;
+ display:block;min-width:0;border:0;padding:0;background:transparent;
+ pointer-events:auto;cursor:none;
+}
+.yard-home-hero .control-zone .prev{left:0;right:auto}
+.yard-home-hero .control-zone .next{left:auto;right:0}
+.yard-home-hero .control-zone .arrow{display:none!important}
+.yard-home-hero .hero-follow-arrow{
+ position:absolute;top:0;left:0;z-index:8;width:49px;height:49px;
+ display:flex;align-items:center;justify-content:center;
+ color:#fff;pointer-events:none;opacity:0;
+ transform:translate3d(-100px,-100px,0);
+ transition:opacity .14s ease;filter:drop-shadow(0 1px 3px rgba(0,0,0,.28));
+}
+.yard-home-hero .hero-follow-arrow.is-visible{opacity:1}
+.yard-home-hero .hero-follow-arrow svg{width:40px;height:40px;stroke-width:1.65}
+.yard-home-hero .hero-caption a{cursor:pointer}
+.home-featured-grid{
+ grid-template-columns:minmax(0,1.42fr) minmax(0,1.42fr) minmax(0,1fr);
+ gap:clamp(25px,3.7vw,58px);align-items:start;
+ max-width:none;width:100%;
+}
+.home-featured-grid[data-count="2"]{grid-template-columns:minmax(0,1fr) minmax(0,1fr);max-width:900px}
+.home-featured-image{aspect-ratio:1.49}
+.home-featured-card:nth-child(2) .home-featured-image{aspect-ratio:1}
+.home-featured-card:nth-child(3) .home-featured-image{aspect-ratio:.526}
+.home-featured-caption strong{font-size:clamp(14px,1.14vw,18px);line-height:1.28}
+.home-featured-caption small{font-size:11px}
+.home-featured{padding-bottom:clamp(55px,6.5vw,110px)}
+/* The previous site's “Новый взгляд на проект” returns after the triptych. */
+.closing.home-scroll-rise{padding-top:clamp(80px,8vw,125px)}
+@media(max-width:900px){
+ .home-featured-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .home-featured-card:nth-child(3){grid-column:2;max-width:75%}
+}
+@media(max-width:600px){
+ .yard-home-hero .hero-caption{bottom:18px}
+ .yard-home-hero .hero-caption a{font-size:16px}
+ .yard-home-hero .hero-caption span{font-size:11px}
+ .yard-home-hero .counter{bottom:18px}
+ .yard-home-hero .hero-follow-arrow{display:none}
+ .yard-home-hero .control-zone .arrow-zone{cursor:pointer;width:50%;height:100%}
+ /* On touch the project name is available without requiring hover. */
+ .yard-home-hero .hero-slide.active .hero-caption{opacity:1;pointer-events:auto}
+ .home-featured-grid,.home-featured-grid[data-count="2"],.home-featured-grid[data-count="1"]{gap:52px}
+ .home-featured-card:nth-child(3){grid-column:auto;max-width:none}
+ .home-featured-caption strong{font-size:18px}
+ .home-featured{padding-bottom:50px}
+ .closing.home-scroll-rise{padding-top:65px}
+}
+@media(hover:none){
+ .yard-home-hero .hero-slide.active .hero-caption{opacity:1;pointer-events:auto}
+ .yard-home-hero .control-zone .arrow{display:grid!important;opacity:1}
+ .yard-home-hero .control-zone .arrow-zone{
+  display:flex;align-items:center;
+ }
+ .yard-home-hero .control-zone .prev{justify-content:flex-start;padding-left:7px}
+ .yard-home-hero .control-zone .next{justify-content:flex-end;padding-right:7px}
+ .yard-home-hero .control-zone .arrow svg{width:26px;height:26px}
+}
+@media(prefers-reduced-motion:reduce){
+ .yard-home-hero .hero-slide,.yard-home-hero .hero-slide.is-animating{
+  transition:none!important;
+ }
+ .yard-home-hero .hero-follow-arrow{transition:none}
+}
+
 </style>
 </head>
 <body>
