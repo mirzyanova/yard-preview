@@ -898,6 +898,85 @@ return '<svg class="'+(cssClass||"")+'" viewBox="0 0 24 24" fill="none" stroke="
 }
 function controls(){return '<div class="control-zone"><button class="arrow-zone prev" type="button" aria-label="Предыдущее изображение"><span class="arrow" aria-hidden="true">'+iconSvg("prev")+'</span></button><button class="arrow-zone next" type="button" aria-label="Следующее изображение"><span class="arrow" aria-hidden="true">'+iconSvg("next")+'</span></button></div>'}
 function setActive(route){document.querySelectorAll(".nav a").forEach(function(a){var k=a.getAttribute("data-page");a.classList.toggle("active", k==="about"&&(route==="/"||route==="/about")||k==="projects"&&route.indexOf("/projects")===0||k==="contacts"&&route==="/contacts")})}
+/* Match the header to the photograph or page actually behind each link.
+   The output palette is deliberately binary: #000 or #fff, never grey. */
+var headerContrastFrame=0;
+function yardPhotoLuminance(img,pointX,pointY){
+if(!img.complete||!img.naturalWidth||!img.naturalHeight)return null;
+var rect=img.getBoundingClientRect();
+if(pointX<rect.left||pointX>=rect.right||pointY<rect.top||pointY>=rect.bottom)return null;
+var computed=getComputedStyle(img);
+var fit=computed.objectFit||"fill";
+var scale=fit==="contain"?Math.min(rect.width/img.naturalWidth,rect.height/img.naturalHeight):
+fit==="cover"?Math.max(rect.width/img.naturalWidth,rect.height/img.naturalHeight):
+null;
+var sx,sy;
+if(scale){
+ var position=computed.objectPosition.split(/\s+/);
+ var horizontal=parseFloat(position[0]),vertical=parseFloat(position[1]||"50%");
+ horizontal=Number.isFinite(horizontal)?horizontal:50;
+ vertical=Number.isFinite(vertical)?vertical:50;
+ var renderedW=img.naturalWidth*scale,renderedH=img.naturalHeight*scale;
+ var drawLeft=rect.left+(rect.width-renderedW)*horizontal/100;
+ var drawTop=rect.top+(rect.height-renderedH)*vertical/100;
+ sx=(pointX-drawLeft)/scale;sy=(pointY-drawTop)/scale
+}else{
+ sx=(pointX-rect.left)*img.naturalWidth/rect.width;
+ sy=(pointY-rect.top)*img.naturalHeight/rect.height
+}
+if(sx<0||sy<0||sx>=img.naturalWidth||sy>=img.naturalHeight)return null;
+try{
+ var canvas=document.createElement("canvas");canvas.width=6;canvas.height=6;
+ var ctx=canvas.getContext("2d",{willReadFrequently:true});
+ var span=Math.min(45,img.naturalWidth/20,img.naturalHeight/20);
+ var x=Math.max(0,Math.min(img.naturalWidth-span,sx-span/2));
+ var y=Math.max(0,Math.min(img.naturalHeight-span,sy-span/2));
+ ctx.drawImage(img,x,y,span,span,0,0,6,6);
+ var rgba=ctx.getImageData(0,0,6,6).data,lum=0,samples=0;
+ for(var i=0;i<rgba.length;i+=4){
+  if(rgba[i+3]<180)continue;
+  var r=rgba[i]/255,g=rgba[i+1]/255,b=rgba[i+2]/255;
+  var linear=function(v){return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)};
+  lum+=.2126*linear(r)+.7152*linear(g)+.0722*linear(b);samples++
+ }
+ return samples?lum/samples:null
+}catch(error){return null}
+}
+function yardContrastAt(x,y,photos){
+for(var i=photos.length-1;i>=0;i--){
+ var img=photos[i];
+ if(!img.getClientRects().length)continue;
+ if(img.closest(".hero-slide")&&!img.closest(".hero-slide.active"))continue;
+ var rect=img.getBoundingClientRect();
+ if(x<rect.left||x>=rect.right||y<rect.top||y>=rect.bottom)continue;
+ var lum=yardPhotoLuminance(img,x,y);
+ if(lum!==null)return lum<.179?"#fff":"#000";
+ if(img.closest(".hero-slide.active"))return "#fff"
+}
+var hero=app.querySelector(".yard-home-hero");
+if(hero){var r=hero.getBoundingClientRect();if(y>=r.top&&y<r.bottom)return "#fff"}
+return "#000"
+}
+function updateHeaderContrast(){
+var header=document.querySelector(".site-header");if(!header)return;
+var hero=app.querySelector(".yard-home-hero"),heroBottom=hero?hero.getBoundingClientRect().bottom:0;
+document.body.classList.toggle("header-below-hero",!hero||heroBottom<=header.offsetHeight);
+var photos=Array.from(app.querySelectorAll(
+ ".hero-slide.active > img,.project-gallery-image,.mosaic .tile-visual img,.home-featured-image img"
+));
+header.querySelectorAll(".logo,.nav a").forEach(function(link){
+ var rect=link.getBoundingClientRect();
+ link.style.color=yardContrastAt(rect.left+rect.width/2,rect.top+rect.height/2,photos);
+})
+}
+function requestHeaderContrast(){
+if(headerContrastFrame)return;
+headerContrastFrame=requestAnimationFrame(function(){headerContrastFrame=0;updateHeaderContrast()})
+}
+window.addEventListener("scroll",requestHeaderContrast,{passive:true});
+window.addEventListener("resize",requestHeaderContrast,{passive:true});
+document.addEventListener("load",requestHeaderContrast,true);
+
 function bindSlideshow(root,images,autoplay){
 var index=0,photo=root.querySelector(".gallery-photo"),slides=Array.from(root.querySelectorAll(".hero-slide")),count=root.querySelector(".counter,.gallery-count");
 var transitioning=false,transitionTimer=null,swipeMs=900;
@@ -1251,7 +1330,7 @@ app.innerHTML='<section class="contacts"><div class="contacts-heading"><h1>Ко�
 '<p class="contact-form-status" role="status" aria-live="polite"></p></form></section></section>';
 bindContactForm();
 }
-function route(){portfolioRevealGeneration++;if(portfolioRevealObserver){portfolioRevealObserver.disconnect();portfolioRevealObserver=null}app.classList.remove("portfolio-rise-ready");clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);document.body.classList.toggle("yard-home-route",r==="/"||r==="/about");if(r==="/"||r==="/about"){home()}else if(r==="/projects"||r.indexOf("/projects?")===0){var selectedView=/[?&]view=list(?:&|$)/.test(r)?"list":(/[?&]view=grid(?:&|$)/.test(r)?"grid":projectView);allProjects(selectedView)}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0);if(r==="/about")requestAnimationFrame(function(){var target=document.getElementById("about");if(target)target.scrollIntoView({behavior:"smooth",block:"start"})})}
+function route(){portfolioRevealGeneration++;if(portfolioRevealObserver){portfolioRevealObserver.disconnect();portfolioRevealObserver=null}app.classList.remove("portfolio-rise-ready");clearEvents();clearEvents=function(){};var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";setActive(r);document.body.classList.toggle("yard-home-route",r==="/"||r==="/about");if(r==="/"||r==="/about"){home()}else if(r==="/projects"||r.indexOf("/projects?")===0){var selectedView=/[?&]view=list(?:&|$)/.test(r)?"list":(/[?&]view=grid(?:&|$)/.test(r)?"grid":projectView);allProjects(selectedView)}else if(r==="/contacts"){contacts()}else if(r==="/privacy"){privacy()}else if(/^\/projects\/\d+$/.test(r)){var p=projects[Number(r.split("/")[2])];if(p)oneProject(p);else allProjects()}else home();window.scrollTo(0,0);requestHeaderContrast();if(r==="/about")requestAnimationFrame(function(){var target=document.getElementById("about");if(target)target.scrollIntoView({behavior:"smooth",block:"start"})})}
 window.addEventListener("resize",function(){var r=decodeURIComponent((location.hash||"#/").slice(1))||"/";if((r==="/projects"||r.indexOf("/projects?")===0)&&projectView==="grid"&&app.dataset.mosaicColumns!==String(mosaicColumnCount()))allProjects("grid")});
 window.addEventListener("hashchange",route);route();
 var cb=document.getElementById("cookieBanner");
