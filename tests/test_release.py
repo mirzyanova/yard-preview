@@ -118,7 +118,7 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn('galleryItems:Array.isArray(p.galleryItems)',site)
             self.assertNotIn('bindSlideshow(app.querySelector(".gallery")',site)
             self.assertTrue(deploy.validate_release(release))
-    def test_project_gallery_swipes_and_description_uses_left_axis(self):
+    def test_project_gallery_swipes_and_description_aligns_right_of_facts(self):
         source=(ROOT/'index.html').read_text()
         self.assertIn('class="project-gallery-slide active"',source)
         self.assertIn('class="project-gallery-slide" aria-hidden="true"',source)
@@ -136,8 +136,13 @@ class DeploymentBoundaryTests(unittest.TestCase):
         self.assertIn('.project-gallery-stage{overflow:hidden;isolation:isolate}',source)
         self.assertIn('if(img.closest(".project-gallery-slide")&&!img.closest(".project-gallery-slide.active"))continue;',source)
         self.assertIn('projectImages(p)+projectStory(p)',source)
-        self.assertIn('.project-page .project-story{\n display:flex;flex-direction:column;',source)
-        self.assertIn('.project-story-description{align-self:flex-start;width:100%;max-width:100%}',source)
+        self.assertIn('.project-page .project-story{\n display:grid;',source)
+        self.assertIn('grid-template-columns:minmax(0,30%) minmax(0,1fr);',source)
+        self.assertIn('width:100%;max-width:none;',source)
+        self.assertIn('.project-page .project-story-facts{grid-column:1;min-width:0}',source)
+        self.assertIn('grid-column:2;align-self:start;',source)
+        self.assertIn('.project-page .project-story-description .detail-copy{width:100%;max-width:none}',source)
+        self.assertIn('.project-page .project-story{grid-template-columns:1fr;row-gap:',source)
         self.assertNotIn('<h2 class="project-story-label">О ПРОЕКТЕ</h2>',source)
         self.assertIn('<section class="project-story" aria-label="Сведения о проекте">',source)
         with tempfile.TemporaryDirectory() as temp:
@@ -146,7 +151,8 @@ class DeploymentBoundaryTests(unittest.TestCase):
             page=(output/'index.html').read_text()
             self.assertIn('class="project-gallery-slide active"',page)
             self.assertIn('stage.addEventListener("touchend"',page)
-            self.assertIn('.project-story-description{align-self:flex-start;width:100%;max-width:100%}',page)
+            self.assertIn('grid-template-columns:minmax(0,30%) minmax(0,1fr);',page)
+            self.assertIn('grid-column:2;align-self:start;',page)
             self.assertNotIn('<h2 class="project-story-label">О ПРОЕКТЕ</h2>',page)
             self.assertTrue(deploy.validate_release(output))
 
