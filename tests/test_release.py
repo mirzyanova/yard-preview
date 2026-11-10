@@ -232,13 +232,19 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertNotIn('<h2 class="project-story-label">ПРОЕКТ</h2>',compiled)
             self.assertTrue(deploy.validate_release(output))
 
-    def test_home_sections_reveal_in_order_only_when_scrolled_into_view(self):
+    def test_new_home_is_project_led_and_sections_reveal_when_scrolled_into_view(self):
         source=(ROOT/'index.html').read_text()
-        closing='class="closing home-scroll-rise"'
-        facts='class="yard-facts home-scroll-rise"'
-        self.assertEqual(source.count(closing),1)
-        self.assertEqual(source.count(facts),1)
-        self.assertLess(source.index(closing),source.index(facts))
+        self.assertIn('class="hero yard-home-hero"',source)
+        self.assertIn('assets/yard-logo-white.svg',source)
+        self.assertIn('class="hero-identity"',source)
+        self.assertIn('class="home-philosophy home-scroll-rise"',source)
+        self.assertIn('Продвигаем идею осмысленной ландшафтной архитектуры',source)
+        self.assertIn('class="home-featured-card home-scroll-rise"',source)
+        self.assertIn('projects.slice(0,3)',source)
+        self.assertIn('p.location',source)
+        self.assertNotIn('class="closing home-scroll-rise"',source)
+        self.assertLess(source.index('class="hero yard-home-hero"'),source.index('class="home-philosophy home-scroll-rise"'))
+        self.assertLess(source.index('class="home-philosophy home-scroll-rise"'),source.index('class="home-featured"'))
         self.assertIn('function bindHomeScrollRise()',source)
         self.assertIn('new IntersectionObserver(function(entries)',source)
         self.assertIn('entry.target.classList.add("is-visible")',source)
@@ -246,18 +252,35 @@ class DeploymentBoundaryTests(unittest.TestCase):
         self.assertIn('observer.disconnect()',source)
         self.assertIn('var previousCleanup=clearEvents;',source)
         self.assertIn('rootMargin:"0px 0px -9% 0px"',source)
-        self.assertIn('@media(prefers-reduced-motion:no-preference)',source)
-        self.assertIn('@media(prefers-reduced-motion:reduce)',source)
         self.assertIn('#app.home-rise-ready .home-scroll-rise:not(.is-visible)',source)
-        self.assertIn('opacity:0;transform:translate3d(0,clamp(58px,7vw,112px),0) scale(.982)',source)
         self.assertIn('bindHomeScrollRise()\n}',source)
         with tempfile.TemporaryDirectory() as temp:
             release=Path(temp)/'release'
             build.build(release,'b'*40)
             html=(release/'index.html').read_text()
-            self.assertLess(html.index(closing),html.index(facts))
-            self.assertIn('function bindHomeScrollRise()',html)
-            self.assertIn('#app.home-rise-ready .home-scroll-rise:not(.is-visible)',html)
+            self.assertIn('class="hero yard-home-hero"',html)
+            self.assertIn('yardHeroImage(p)',html)
+            self.assertIn('assets/yard-logo-white.svg',html)
+            self.assertIn('class="home-featured-card home-scroll-rise"',html)
+            self.assertTrue((release/'assets'/'yard-logo-white.svg').is_file())
+            self.assertTrue(deploy.validate_release(release))
+
+    def test_fixed_adaptive_header_and_three_second_hero(self):
+        source=(ROOT/'index.html').read_text()
+        self.assertIn('mix-blend-mode:difference',source)
+        self.assertIn('body:not(.yard-home-route) #app{padding-top:82px}',source)
+        self.assertIn('document.body.classList.toggle("yard-home-route"',source)
+        self.assertIn('position:fixed;top:0;left:0;right:0;height:82px',source)
+        self.assertIn('setInterval(function(){if(!document.hidden)show(index+1)},3000)',source)
+        self.assertIn('if(prev)prev.onclick=',source)
+        self.assertIn('if(next)next.onclick=',source)
+        self.assertIn('if(r==="/about")requestAnimationFrame(',source)
+        with tempfile.TemporaryDirectory() as temp:
+            release=Path(temp)/'release'
+            build.build(release,'a'*40)
+            html=(release/'index.html').read_text()
+            self.assertIn('images.length>1&&!window.matchMedia',html)
+            self.assertIn('mix-blend-mode:difference',html)
             self.assertTrue(deploy.validate_release(release))
 
     def test_portfolio_labels_overlay_images_with_accessible_hover(self):
