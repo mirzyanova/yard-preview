@@ -344,7 +344,7 @@ class DeploymentBoundaryTests(unittest.TestCase):
             release=Path(temp)/'release'
             build.build(release,'a'*40)
             html=(release/'index.html').read_text()
-            self.assertIn('images.length>1&&!window.matchMedia',html)
+            self.assertIn('if(autoplay&&images.length>1&&!document.hidden&&!window.matchMedia',html)
             self.assertIn('header.style.color=whiteVotes>=3?"#fff":"#000";',html)
             self.assertIn('sessionStorage.getItem("yardCookieShownThisSession")',html)
             self.assertTrue(deploy.validate_release(release))
@@ -370,6 +370,43 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn('font-size:clamp(21px,1.74vw,25.5px)',page)
             self.assertIn('background:linear-gradient(180deg,transparent 38%',page)
             self.assertTrue(deploy.validate_release(output))
+
+    def test_home_hero_loads_visible_image_first_and_defers_remaining_images(self):
+        source=(ROOT/'index.html').read_text()
+        boot=(ROOT/'cms/client-boot.js').read_text()
+        builder=(ROOT/'scripts/build_release.py').read_text()
+        self.assertIn('function heroSlideImage(p,i)',source)
+        self.assertIn('var html=img(heroImage(p),p.name);',source)
+        self.assertIn('var responsive=p.homeSrcset||"";',source)
+        self.assertIn('heroSlideImage(p,i)+',source)
+        self.assertIn('loading="eager" fetchpriority="high" decoding="async"',source)
+        self.assertIn('return html.replace(\' src="\',\' data-src="\')',source)
+        self.assertIn('data-srcset=',source)
+        self.assertIn('sizes="100vw"',source)
+        self.assertIn('function loadSlide(n,urgent,onReady)',source)
+        self.assertIn('image.fetchPriority=urgent?"high":"low";',source)
+        self.assertIn('function warmNext()',source)
+        self.assertIn('loadSlide((index+1)%slides.length,false)',source)
+        self.assertIn('loadSlide(0,true,function(){requestHeaderContrast();warmNext();start()});',source)
+        self.assertIn('loadSlide(target,true,function(){',source)
+        self.assertIn('if(disposed||!root.isConnected)',source)
+        self.assertIn('homeSrcset:yardHomeSrcset(p)',boot)
+        self.assertIn('function yardSafeSrcset(value)',boot)
+        self.assertIn('function yardHomeSrcset(p)',boot)
+        self.assertIn('yardMediaUrl(match[1])',boot)
+        self.assertIn('p.galleryMedia',boot)
+        self.assertIn('yardHeroImage(p)',builder)
+        self.assertNotIn("html = once(html, 'if(autoplay&&!window.matchMedia'",builder)
+        with tempfile.TemporaryDirectory() as temp:
+            target=Path(temp)/'release'
+            build.build(target,'f'*40)
+            site=(target/'index.html').read_text()
+            self.assertIn('var html=yardHeroImage(p);',site)
+            self.assertIn('loading="eager" fetchpriority="high" decoding="async"',site)
+            self.assertIn('homeSrcset:yardHomeSrcset(p)',site)
+            self.assertIn('loadSlide(0,true,function(){requestHeaderContrast();warmNext();start()});',site)
+            self.assertNotIn('img(heroImage(p),p.name)',site)
+            self.assertTrue(deploy.validate_release(target))
 
     def test_real_projects_only_and_missing_data_remains_empty(self):
         projects=json.loads((ROOT/'cms/yard-projects/seed.json').read_text())['projects']
