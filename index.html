@@ -790,15 +790,24 @@ return '<svg class="'+(cssClass||"")+'" viewBox="0 0 24 24" fill="none" stroke="
 function controls(){return '<div class="control-zone"><button class="arrow-zone prev" type="button" aria-label="Предыдущее изображение"><span class="arrow" aria-hidden="true">'+iconSvg("prev")+'</span></button><button class="arrow-zone next" type="button" aria-label="Следующее изображение"><span class="arrow" aria-hidden="true">'+iconSvg("next")+'</span></button></div>'}
 function setActive(route){document.querySelectorAll(".nav a").forEach(function(a){var k=a.getAttribute("data-page");a.classList.toggle("active", k==="about"&&(route==="/"||route==="/about")||k==="projects"&&route.indexOf("/projects")===0||k==="contacts"&&route==="/contacts")})}
 function bindSlideshow(root,images,autoplay){
-var index=0, photo=root.querySelector(".gallery-photo"), slides=root.querySelectorAll(".hero-slide"), count=root.querySelector(".counter,.gallery-count");
-function show(n){index=(n+images.length)%images.length;if(photo){photo.onerror=function(){if(this.getAttribute("src")!=="assets/erfurt-photo-pending.svg")this.src="assets/erfurt-photo-pending.svg"};photo.src=images[index]}if(slides.length){slides.forEach(function(el,i){el.classList.toggle("active",i===index);el.setAttribute("aria-hidden",String(i!==index))})}if(count)count.textContent=String(index+1).padStart(2,"0")+" / "+String(images.length).padStart(2,"0")}
+var index=0,photo=root.querySelector(".gallery-photo"),slides=root.querySelectorAll(".hero-slide"),count=root.querySelector(".counter,.gallery-count");
+function show(n){
+index=(n+images.length)%images.length;
+if(photo){photo.onerror=function(){if(this.getAttribute("src")!=="assets/erfurt-photo-pending.svg")this.src="assets/erfurt-photo-pending.svg"};photo.src=images[index]}
+if(slides.length){slides.forEach(function(el,i){el.classList.toggle("active",i===index);el.setAttribute("aria-hidden",String(i!==index))})}
+if(count)count.textContent=String(index+1).padStart(2,"0")+" / "+String(images.length).padStart(2,"0")
+}
 function stop(){if(timer){clearInterval(timer);timer=null}}
-function start(){if(autoplay&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){stop();timer=setInterval(function(){show(index+1)},3000)}}
-root.querySelector(".prev").onclick=function(){show(index-1);start()};
-root.querySelector(".next").onclick=function(){show(index+1);start()};
-root.onmouseenter=null;root.onmouseleave=null;
-var sx=0;root.ontouchstart=function(e){sx=e.changedTouches[0].screenX};root.ontouchend=function(e){var dx=e.changedTouches[0].screenX-sx;if(Math.abs(dx)>55){show(index+(dx>0?-1:1));start()}};
-start();clearEvents=stop;
+function start(){if(autoplay&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){stop();timer=setInterval(function(){if(!document.hidden)show(index+1)},3000)}}
+var prev=root.querySelector(".prev"),next=root.querySelector(".next");
+if(prev)prev.onclick=function(){show(index-1);start()};
+if(next)next.onclick=function(){show(index+1);start()};
+var sx=0;
+root.ontouchstart=function(e){if(e.changedTouches.length)sx=e.changedTouches[0].screenX};
+root.ontouchend=function(e){if(!e.changedTouches.length)return;var dx=e.changedTouches[0].screenX-sx;if(Math.abs(dx)>55&&images.length>1){show(index+(dx>0?-1:1));start()}};
+function visibility(){if(document.hidden)stop();else start()}
+document.addEventListener("visibilitychange",visibility);
+start();clearEvents=function(){stop();document.removeEventListener("visibilitychange",visibility);root.ontouchstart=null;root.ontouchend=null}
 }
 /* Progressive scroll reveal for the two editorial homepage sections.
    The observer runs only on the homepage and disconnects when the route changes.
