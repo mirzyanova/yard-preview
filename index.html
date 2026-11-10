@@ -1042,6 +1042,7 @@ for(var i=photos.length-1;i>=0;i--){
  var img=photos[i];
  if(!img.getClientRects().length)continue;
  if(img.closest(".hero-slide")&&!img.closest(".hero-slide.active"))continue;
+ if(img.closest(".project-gallery-slide")&&!img.closest(".project-gallery-slide.active"))continue;
  var rect=img.getBoundingClientRect();
  if(x<rect.left||x>=rect.right||y<rect.top||y>=rect.bottom)continue;
  var lum=yardPhotoLuminance(img,x,y);
