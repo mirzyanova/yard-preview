@@ -847,6 +847,11 @@ body:not(.yard-home-route) #app{padding-top:82px}
 
 /* Ensure the actual project caption remains clickable over the navigation halves. */
 .yard-home-hero .hero-caption{z-index:10}
+/* The bottom quarter belongs to the clickable title, not an invisible
+   navigation button. The cursor arrow itself can still follow the mouse. */
+.yard-home-hero .control-zone .arrow-zone{height:75%}
+@media(max-width:600px){.yard-home-hero .control-zone .arrow-zone{height:75%}}
+
 </style>
 </head>
 <body>
