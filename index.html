@@ -1091,73 +1091,122 @@ document.addEventListener("load",requestHeaderContrast,true);
 
 function bindSlideshow(root,images,autoplay){
 var index=0,photo=root.querySelector(".gallery-photo"),slides=Array.from(root.querySelectorAll(".hero-slide")),count=root.querySelector(".counter,.gallery-count");
-var transitioning=false,transitionTimer=null,swipeMs=1300;
+var transitioning=false,transitionTimer=null,swipeMs=1300,disposed=false,warmTimer=null;
 var prev=root.querySelector(".prev"),next=root.querySelector(".next"),follow=root.querySelector(".hero-follow-arrow");
-var pointerFrame=0,pointerX=-100,pointerY=-100,pointerDir="next",lastPointerType=null;
+var pointerFrame=0,pointerX=-100,pointerY=-100,pointerDir="next";
+function loadSlide(n,urgent,onReady){
+ var slide=slides[n],image=slide&&slide.querySelector("img");
+ if(!image){if(onReady)onReady();return}
+ if(image.dataset.src){
+  image.fetchPriority=urgent?"high":"low";
+  if(image.dataset.srcset){
+   image.srcset=image.dataset.srcset;
+   image.sizes="100vw";
+   image.removeAttribute("data-srcset")
+  }
+  image.src=image.dataset.src;
+  image.removeAttribute("data-src")
+ }
+ if(!onReady)return;
+ if(image.complete){onReady();return}
+ var handled=false;
+ function complete(){
+  if(handled)return;
+  handled=true;image.removeEventListener("load",complete);image.removeEventListener("error",complete);
+  if(!disposed)onReady()
+ }
+ image.addEventListener("load",complete);
+ image.addEventListener("error",complete);
+ if(image.complete)complete()
+}
+function warmNext(){
+ if(disposed||!slides.length||slides.length<2)return;
+ if(warmTimer)clearTimeout(warmTimer);
+ warmTimer=setTimeout(function(){
+  warmTimer=null;
+  if(!disposed&&root.isConnected)loadSlide((index+1)%slides.length,false)
+ },300)
+}
 function finish(){
-if(transitionTimer){clearTimeout(transitionTimer);transitionTimer=null}
-transitioning=false;slides.forEach(function(slide){slide.classList.remove("is-exiting","is-animating","from-left","from-right")});
-requestHeaderContrast()
+ if(transitionTimer){clearTimeout(transitionTimer);transitionTimer=null}
+ transitioning=false;slides.forEach(function(slide){slide.classList.remove("is-exiting","is-animating","from-left","from-right")});
+ requestHeaderContrast();warmNext()
 }
 function show(n){
-if(!images.length||transitioning)return;
-var target=(n+images.length)%images.length;
-if(target===index)return;
-var oldIndex=index,direction=n<index?"prev":"next",previous=slides[oldIndex],incoming=slides[target];
-index=target;
-if(photo){photo.onerror=function(){if(this.getAttribute("src")!=="assets/erfurt-photo-pending.svg")this.src="assets/erfurt-photo-pending.svg"};photo.src=images[index]}
-if(slides.length){
-var reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-if(reduced){slides.forEach(function(el,i){el.classList.toggle("active",i===index);el.setAttribute("aria-hidden",String(i!==index))});requestHeaderContrast()}
-else{
+ if(!images.length||transitioning||disposed)return;
+ var target=(n+images.length)%images.length;
+ if(target===index)return;
+ var oldIndex=index,direction=n<index?"prev":"next",previous=slides[oldIndex],incoming=slides[target];
  transitioning=true;
- incoming.classList.remove("active","is-exiting","is-animating","from-left","from-right");
- incoming.classList.add(direction==="prev"?"from-left":"from-right");
- incoming.setAttribute("aria-hidden","true");
- previous.classList.add("is-exiting");
- /* Establish the incoming slide off-screen before enabling the motion. */
- incoming.getBoundingClientRect();
- previous.classList.add("is-animating");
- incoming.classList.add("is-animating");
- previous.classList.remove("active");
- previous.classList.add(direction==="prev"?"from-right":"from-left");
- incoming.classList.remove("from-left","from-right");
- incoming.classList.add("active");
- incoming.setAttribute("aria-hidden","false");
- previous.setAttribute("aria-hidden","true");
- transitionTimer=setTimeout(finish,swipeMs+65);
-}
-}
-if(count)count.textContent=String(index+1).padStart(2,"0")+" / "+String(images.length).padStart(2,"0")
+ /* The requested image must finish loading before the swipe begins. */
+ loadSlide(target,true,function(){
+  if(disposed||!root.isConnected){transitioning=false;return}
+  index=target;
+  if(photo){photo.onerror=function(){if(this.getAttribute("src")!=="assets/erfurt-photo-pending.svg")this.src="assets/erfurt-photo-pending.svg"};photo.src=images[index]}
+  if(slides.length){
+   var reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+   if(reduced){
+    slides.forEach(function(el,i){el.classList.toggle("active",i===index);el.setAttribute("aria-hidden",String(i!==index))});
+    transitioning=false;requestHeaderContrast();warmNext()
+   }else{
+    incoming.classList.remove("active","is-exiting","is-animating","from-left","from-right");
+    incoming.classList.add(direction==="prev"?"from-left":"from-right");
+    incoming.setAttribute("aria-hidden","true");
+    previous.classList.add("is-exiting");
+    incoming.getBoundingClientRect();
+    previous.classList.add("is-animating");
+    incoming.classList.add("is-animating");
+    previous.classList.remove("active");
+    previous.classList.add(direction==="prev"?"from-right":"from-left");
+    incoming.classList.remove("from-left","from-right");
+    incoming.classList.add("active");
+    incoming.setAttribute("aria-hidden","false");
+    previous.setAttribute("aria-hidden","true");
+    transitionTimer=setTimeout(finish,swipeMs+65)
+   }
+  }
+  if(count)count.textContent=String(index+1).padStart(2,"0")+" / "+String(images.length).padStart(2,"0")
+ })
 }
 function stop(){if(timer){clearInterval(timer);timer=null}}
-function start(){if(autoplay&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){stop();timer=setInterval(function(){if(!document.hidden)show(index+1)},5000)}}
+function start(){
+ if(autoplay&&images.length>1&&!document.hidden&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  stop();timer=setInterval(function(){if(!document.hidden)show(index+1)},5000)
+ }
+}
 if(prev)prev.onclick=function(){show(index-1);start()};
 if(next)next.onclick=function(){show(index+1);start()};
 function updatePointer(event){
-if(!follow||event.pointerType!=="mouse")return;
-lastPointerType="mouse";
-var rect=root.getBoundingClientRect();
-var x=event.clientX-rect.left,y=event.clientY-rect.top;
-var dir=x<rect.width/2?"prev":"next";
-root.classList.toggle("show-caption",y>=rect.height*.75);
-if(dir!==pointerDir){pointerDir=dir;follow.innerHTML=iconSvg(dir)}
-pointerX=x-24.5;pointerY=y-24.5;
-follow.classList.toggle("is-visible",!event.target.closest(".hero-caption a"));
-if(!pointerFrame){pointerFrame=requestAnimationFrame(function(){
- pointerFrame=0;follow.style.transform="translate3d("+pointerX+"px,"+pointerY+"px,0)"
-})}
+ if(!follow||event.pointerType!=="mouse")return;
+ var rect=root.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;
+ var dir=x<rect.width/2?"prev":"next";
+ root.classList.toggle("show-caption",y>=rect.height*.75);
+ if(dir!==pointerDir){pointerDir=dir;follow.innerHTML=iconSvg(dir)}
+ pointerX=x-24.5;pointerY=y-24.5;
+ follow.classList.toggle("is-visible",!event.target.closest(".hero-caption a"));
+ if(!pointerFrame)pointerFrame=requestAnimationFrame(function(){
+  pointerFrame=0;follow.style.transform="translate3d("+pointerX+"px,"+pointerY+"px,0)"
+ })
 }
 function leavePointer(){root.classList.remove("show-caption");if(follow)follow.classList.remove("is-visible")}
 root.addEventListener("pointermove",updatePointer);
 root.addEventListener("pointerleave",leavePointer);
 var sx=0,sy=0;
 root.ontouchstart=function(e){if(e.changedTouches.length){sx=e.changedTouches[0].screenX;sy=e.changedTouches[0].screenY}};
-root.ontouchend=function(e){if(!e.changedTouches.length)return;var dx=e.changedTouches[0].screenX-sx,dy=e.changedTouches[0].screenY-sy;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.2&&images.length>1){show(index+(dx>0?-1:1));start()}};
+root.ontouchend=function(e){
+ if(!e.changedTouches.length)return;
+ var dx=e.changedTouches[0].screenX-sx,dy=e.changedTouches[0].screenY-sy;
+ if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.2&&images.length>1){show(index+(dx>0?-1:1));start()}
+};
 function visibility(){if(document.hidden)stop();else start()}
 document.addEventListener("visibilitychange",visibility);
-start();clearEvents=function(){
- stop();if(transitionTimer)clearTimeout(transitionTimer);if(pointerFrame)cancelAnimationFrame(pointerFrame);
+/* Start autoplay and next-slide prefetch only after the first photograph has
+   become visible; the rest must not compete with it for the network. */
+loadSlide(0,true,function(){requestHeaderContrast();warmNext();start()});
+clearEvents=function(){
+ disposed=true;stop();if(transitionTimer)clearTimeout(transitionTimer);
+ if(warmTimer)clearTimeout(warmTimer);
+ if(pointerFrame)cancelAnimationFrame(pointerFrame);
  document.removeEventListener("visibilitychange",visibility);
  root.removeEventListener("pointermove",updatePointer);root.removeEventListener("pointerleave",leavePointer);
  root.ontouchstart=null;root.ontouchend=null
@@ -1186,12 +1235,26 @@ sections.forEach(function(section){observer.observe(section)});
 var previousCleanup=clearEvents;
 clearEvents=function(){observer.disconnect();app.classList.remove("home-rise-ready");previousCleanup()}
 }
+/* Only the visible hero photograph receives a URL at first render.
+   Inactive slides keep URLs in data-src so iPad/iPhone do not download an
+   entire multi-megabyte gallery before the visitor can see the first image. */
+function heroSlideImage(p,i){
+ var html=img(heroImage(p),p.name);
+ var responsive=p.homeSrcset||"";
+ if(responsive){
+   html=html.replace(' loading="lazy"',
+     (i===0?' srcset="':' data-srcset="')+responsive+'" sizes="100vw" loading="lazy"');
+ }
+ if(i===0)return html.replace(' loading="lazy"',' loading="eager" fetchpriority="high" decoding="async"');
+ return html.replace(' src="',' data-src="')
+   .replace(' loading="lazy"',' loading="lazy" fetchpriority="low" decoding="async"');
+}
 function home(){
 var selected=homeProjects();
 app.innerHTML='<section class="hero yard-home-hero" aria-label="Избранные проекты">'+
 selected.map(function(p,i){
 return '<div class="hero-slide'+(i===0?' active':'')+'" aria-hidden="'+(i!==0)+'">'+
-img(heroImage(p),p.id<=1?p.name:'Демонстрационное фото, не проект ЯРД')+
+heroSlideImage(p,i)+
 '<div class="hero-caption"><a href="#/projects/'+p.id+'">'+p.name+'</a>'+
 (p.location&&p.location!=='—'?'<span>'+p.location+'</span>':'')+
 '</div></div>'
