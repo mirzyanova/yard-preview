@@ -551,8 +551,8 @@
 @media(prefers-reduced-motion:reduce){
  #app .home-scroll-rise{opacity:1!important;transform:none!important;transition:none!important}
 }
-/* Hover-card presentation: text lives inside the photograph, not below it.
-   The dark gradient guarantees white title contrast on both light and dark photos. */
+/* Desktop hover-card presentation: the caption overlays the photograph.
+   On touch screens it sits naturally beneath the unmodified photograph. */
 .mosaic.yard-index .tile-visual{isolation:isolate}
 .mosaic.yard-index .tile-visual::after{
  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
@@ -575,18 +575,30 @@
 .mosaic.yard-index .tile:hover .tile-visual,.mosaic.yard-index .tile:focus-visible .tile-visual{transform:scale(1.025)}
 .mosaic.yard-index .tile:hover .tile-visual::after,.mosaic.yard-index .tile:focus-visible .tile-visual::after{opacity:1}
 .mosaic.yard-index .tile:hover .tile-caption,.mosaic.yard-index .tile:focus-visible .tile-caption{opacity:1;transform:translateY(0)}
-@media(hover:none){
- .mosaic.yard-index .tile-visual::after{
-   background:linear-gradient(180deg,transparent 38%,rgba(0,0,0,.10) 60%,rgba(0,0,0,.58) 100%);
-   opacity:1;
+/* Touch devices, including iPads with a connected trackpad, must never
+   display a permanent hover overlay. A narrow viewport is also a compact layout. */
+@media(hover:none), (pointer:coarse), (any-pointer:coarse), (max-width:900px){
+ .mosaic.yard-index .tile-visual::after{content:none;display:none}
+ .mosaic.yard-index .tile-visual,
+ .mosaic.yard-index .tile:hover .tile-visual,
+ .mosaic.yard-index .tile:focus-visible .tile-visual{transform:none;transition:none}
+ .mosaic.yard-index .tile-visual img,
+ .mosaic.yard-index .tile:hover .tile-visual img{transform:none;filter:none}
+ .mosaic.yard-index .tile-caption,
+ .mosaic.yard-index .tile:hover .tile-caption,
+ .mosaic.yard-index .tile:focus-visible .tile-caption{
+  position:static;inset:auto;display:flex;flex-direction:column;align-items:flex-start;
+  width:100%;min-height:0;margin:0;padding:11px 0 0;gap:4px;
+  background:transparent;color:var(--ink);opacity:1;transform:none;transition:none;
  }
- .mosaic.yard-index .tile-caption{opacity:1;transform:none}
- .mosaic.yard-index .tile:hover .tile-visual{transform:none}
+ .mosaic.yard-index .tile-caption strong{
+  color:var(--ink);font-size:clamp(17px,1.65vw,20px);line-height:1.3;
+ }
+ .mosaic.yard-index .tile-caption small{color:#777;font-size:11px;line-height:1.4}
 }
 @media(max-width:600px){
- .mosaic.yard-index .tile-caption{left:17px;right:17px;bottom:17px;padding:0;min-height:0}
- .mosaic.yard-index .tile-caption strong{font-size:24px;line-height:1.2}
- .mosaic.yard-index .tile-caption small{font-size:12px}
+ .mosaic.yard-index .tile-caption{padding-top:10px}
+ .mosaic.yard-index .tile-caption strong{font-size:18px;line-height:1.3}
 }
 @media(prefers-reduced-motion:reduce){
  .mosaic.yard-index .tile-visual::after,.mosaic.yard-index .tile-caption{transition:none}
@@ -1373,7 +1385,7 @@ var align=columnCount===1?'center':(col===0?'left':(col===columnCount-1?'right':
 var size=projectCardSize(p,i),format=projectCardFormat(p);
 var meta=[p.stage,p.year].filter(Boolean).join(' · ');
 return '<a class="tile format-'+format+' size-'+size+' align-'+align+'" href="#/projects/'+p.id+'" aria-label="'+p.name+(meta?', '+meta:'')+'">'+
-'<span class="tile-visual">'+cardImage(p)+'<span class="tile-caption"><strong>'+p.name+'</strong>'+(meta?'<small>'+meta+'</small>':'')+'</span></span></a>'
+'<span class="tile-visual">'+cardImage(p)+'</span><span class="tile-caption"><strong>'+p.name+'</strong>'+(meta?'<small>'+meta+'</small>':'')+'</span></a>'
 }).join('')+'</div>'
 }).join('');
 app.innerHTML=renderProjectsHeading('grid')+'<section class="mosaic yard-index" aria-label="Все проекты">'+markup+'</section>';
