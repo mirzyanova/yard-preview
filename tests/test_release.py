@@ -349,26 +349,35 @@ class DeploymentBoundaryTests(unittest.TestCase):
             self.assertIn('sessionStorage.getItem("yardCookieShownThisSession")',html)
             self.assertTrue(deploy.validate_release(release))
 
-    def test_portfolio_labels_overlay_images_with_accessible_hover(self):
+    def test_portfolio_desktop_hover_and_touch_captions_below_images(self):
         source=(ROOT/'index.html').read_text()
-        self.assertIn("'<span class=\"tile-visual\">'+cardImage(p)+'<span class=\"tile-caption\">",source)
-        self.assertIn('/* Hover-card presentation: text lives inside the photograph',source)
+        markup="'<span class=\"tile-visual\">'+cardImage(p)+'</span><span class=\"tile-caption\">"
+        self.assertIn(markup,source)
+        self.assertIn('/* Desktop hover-card presentation',source)
         self.assertIn('.mosaic.yard-index .tile-visual::after{',source)
         self.assertIn('linear-gradient(180deg,rgba(0,0,0,.30)',source)
         self.assertIn('font-size:clamp(21px,1.74vw,25.5px)',source)
         self.assertIn('.mosaic.yard-index .tile:hover .tile-visual::after',source)
         self.assertIn('.mosaic.yard-index .tile:focus-visible .tile-visual::after',source)
         self.assertIn('.mosaic.yard-index .tile:hover .tile-caption',source)
-        self.assertIn('.mosaic.yard-index .tile-caption{left:17px;right:17px;bottom:17px;',source)
-        self.assertIn('@media(hover:none)',source)
+        query='@media(hover:none), (pointer:coarse), (any-pointer:coarse), (max-width:900px)'
+        self.assertIn(query,source)
+        self.assertIn('.mosaic.yard-index .tile-visual::after{content:none;display:none}',source)
+        self.assertIn('position:static;inset:auto;display:flex;flex-direction:column;',source)
+        self.assertIn('background:transparent;color:var(--ink);opacity:1;transform:none;transition:none;',source)
+        self.assertIn('font-size:clamp(17px,1.65vw,20px)',source)
+        self.assertIn('font-size:18px;line-height:1.3',source)
+        self.assertIn('.mosaic.yard-index .tile:hover .tile-visual img{transform:none;filter:none}',source)
         self.assertIn('@media(prefers-reduced-motion:reduce)',source)
         with tempfile.TemporaryDirectory() as temp:
             output=Path(temp)/'release'
             build.build(output,'c'*40)
             page=(output/'index.html').read_text()
-            self.assertIn("'<span class=\"tile-visual\">'+cardImage(p)+'<span class=\"tile-caption\">",page)
+            self.assertIn(markup,page)
             self.assertIn('font-size:clamp(21px,1.74vw,25.5px)',page)
-            self.assertIn('background:linear-gradient(180deg,transparent 38%',page)
+            self.assertIn(query,page)
+            self.assertIn('.mosaic.yard-index .tile-visual::after{content:none;display:none}',page)
+            self.assertIn('position:static;inset:auto;display:flex;flex-direction:column;',page)
             self.assertTrue(deploy.validate_release(output))
 
     def test_home_hero_loads_visible_image_first_and_defers_remaining_images(self):
